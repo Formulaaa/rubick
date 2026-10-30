@@ -13,7 +13,7 @@ export default {
       successColor: '#c0d695',
       infoColor: '#aa8eeB',
       logo: pathToFileURL(path.join(staticPath, 'logo.png')).href,
-      placeholder: '你好，Rubick！请输入插件关键词',
+      placeholder: '搜索应用、插件、文件或命令',
       username: 'Rubick',
     },
     shortCut: {

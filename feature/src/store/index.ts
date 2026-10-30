@@ -77,6 +77,16 @@ export default createStore({
       });
     },
 
+    errorDownload({ commit, state }, name) {
+      const totalPlugins = JSON.parse(JSON.stringify(state.totalPlugins));
+      totalPlugins.forEach((origin: Market.Plugin) => {
+        if (origin.name === name) {
+          origin.isloading = false;
+        }
+      });
+      commit('commonUpdate', { totalPlugins });
+    },
+
     startUnDownload({ commit, state }, name) {
       const localPlugins = window.market.getLocalPlugins();
       localPlugins.forEach((origin: Market.Plugin) => {

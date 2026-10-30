@@ -1,61 +1,221 @@
 <template>
-  <div v-show="!currentPlugin.name" class="options">
-    <div
-      class="history-plugins"
-      v-if="
-        !options.length &&
-        !searchValue &&
-        !clipboardFile.length &&
-        config.perf.common.history
-      "
-    >
-      <a-row>
-        <a-col
-          @click="() => openPlugin(item)"
-          @contextmenu.prevent="openMenu($event,item)"
+  <div
+    v-show="!currentPlugin.name"
+    class="result-body glass-scroll max-h-[544px] min-h-0 overflow-auto px-3 pb-2"
+  >
+    <template v-if="showHome">
+      <div class="mb-1 flex h-7 items-center justify-between gap-2 px-1">
+        <div v-if="hasPinned && hasRecent" class="flex items-center gap-1">
+          <button
+            type="button"
+            class="focus-ring h-6 rounded-full px-2 text-[11px] transition-colors"
+            :class="
+              homeTab === 'pinned'
+                ? 'bg-accent/10 text-accent'
+                : 'text-glass-muted hover:text-glass-text'
+            "
+            @click="emit('setHomeTab', 'pinned')"
+          >
+            {{ copy.pinned }}
+          </button>
+          <button
+            type="button"
+            class="focus-ring h-6 rounded-full px-2 text-[11px] transition-colors"
+            :class="
+              homeTab === 'recent'
+                ? 'bg-accent/10 text-accent'
+                : 'text-glass-muted hover:text-glass-text'
+            "
+            @click="emit('setHomeTab', 'recent')"
+          >
+            {{ copy.recent }}
+          </button>
+        </div>
+        <span v-else class="text-[12px] font-medium text-glass-muted">
+          {{ homeTitle }}
+        </span>
+        <button
+          v-if="canExpand"
+          type="button"
+          class="focus-ring flex h-7 items-center gap-1 rounded-lg px-2 text-[11px] text-glass-muted transition-colors hover:bg-glass-soft hover:text-glass-text"
+          :aria-expanded="expanded"
+          @click="emit('toggleExpanded')"
+        >
+          {{ expanded ? copy.collapse : copy.expand }}
+          <svg
+            class="h-3.5 w-3.5 transition-transform duration-200"
+            :class="expanded ? 'rotate-180' : ''"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+      </div>
+      <div class="grid grid-cols-8 gap-1.5 max-[720px]:grid-cols-7 max-[640px]:grid-cols-6">
+        <button
+          v-for="(item, index) in homeItems"
+          :key="item.name || index"
+          type="button"
+          class="group flex h-[96px] min-w-0 flex-col items-center justify-between rounded-[16px] px-1 py-3 transition-colors duration-150 focus-ring"
           :class="
-            currentSelect === index ? 'active history-item' : 'history-item'
+            currentSelect === index
+              ? 'bg-accent/10 shadow-[inset_0_0_0_1px_var(--accent-wash)]'
+              : 'hover:bg-white/[0.04]'
           "
-          :span="3"
-          v-for="(item, index) in pluginHistory"
-          :key="index"
+          :aria-label="itemLabel(item)"
+          @click="() => openPlugin(item)"
+          @contextmenu.prevent="openMenu($event, item)"
         >
-          <a-avatar style="width: 28px; height: 28px" :src="item.icon" />
-          <div class="name ellpise">
-            {{ item.cmd || item.pluginName || item._name || item.name }}
-          </div>
-          <div class="badge" v-if="item.pin"></div>
-        </a-col>
-      </a-row>
+          <span class="icon-plinth h-10 w-10">
+            <img
+              class="h-8 w-8 rounded-[9px] object-contain"
+              :src="item.icon"
+            />
+          </span>
+          <span
+            class="line-clamp-2 w-full overflow-hidden text-center text-[11.5px] leading-[15px] text-glass-text"
+          >
+            {{ itemLabel(item) }}
+          </span>
+        </button>
+      </div>
+    </template>
+
+    <div
+      v-else-if="!options.length && !searchValue"
+      class="flex flex-col items-center justify-center px-4 py-8 text-center"
+    >
+      <div class="text-[13px] font-medium text-glass-text">
+        {{ copy.emptyTitle }}
+      </div>
+      <div class="mt-1 text-[11.5px] text-glass-muted">
+        {{ copy.emptyDesc }}
+      </div>
+      <div class="mt-3 flex items-center gap-2 text-[11px] text-glass-muted">
+        <span class="keycap">Esc</span>
+        <span>{{ copy.emptyHint }}</span>
+      </div>
     </div>
-    <a-list v-else item-layout="horizontal" :dataSource="sort(options)">
-      <template #renderItem="{ item, index }">
-        <a-list-item
+
+    <div
+      v-else-if="searchValue && !options.length"
+      class="flex flex-col items-center justify-center px-4 py-8 text-center"
+    >
+      <div class="text-[13px] font-medium text-glass-text">
+        {{ copy.noResults }}
+      </div>
+      <div class="mt-1 max-w-[320px] text-[11.5px] text-glass-muted">
+        {{ copy.noResultsHint }}
+      </div>
+      <button
+        type="button"
+        class="focus-ring mt-4 rounded-full border border-line px-3 py-1.5 text-[11px] text-glass-text transition-colors hover:bg-glass-soft"
+        @click="emit('clearSearch')"
+      >
+        {{ copy.clearSearch }}
+      </button>
+    </div>
+
+    <template v-else-if="options.length">
+      <div class="mb-1 flex h-7 items-center justify-between px-1">
+        <span class="text-[12px] font-medium text-glass-muted">
+          {{ copy.results }}
+        </span>
+      </div>
+      <div class="space-y-0.5">
+        <button
+          v-for="(item, index) in options"
+          :key="`${item.name}-${index}`"
+          type="button"
+          :title="`${item.name} ${item.desc || ''}`"
+          class="relative flex h-14 w-full items-center gap-3 rounded-[12px] px-3 text-left transition-colors duration-150 focus-ring"
+          :class="
+            currentSelect === index
+              ? 'bg-accent/[0.08] shadow-[inset_0_0_0_1px_var(--accent-wash)]'
+              : 'hover:bg-glass-soft/70'
+          "
           @click="() => item.click()"
-          :class="currentSelect === index ? 'active op-item' : 'op-item'"
         >
-          <a-list-item-meta :description="renderDesc(item.desc)">
-            <template #title>
-              <span v-html="renderTitle(item.name, item.match)"></span>
-            </template>
-            <template #avatar>
-              <a-avatar style="border-radius: 0" :src="item.icon" />
-            </template>
-          </a-list-item-meta>
-        </a-list-item>
-      </template>
-    </a-list>
+          <span
+            v-if="currentSelect === index"
+            class="absolute left-1 top-1/2 h-7 w-[2px] -translate-y-1/2 rounded-full bg-accent"
+          />
+          <span class="icon-plinth h-9 w-9">
+            <img
+              class="h-7 w-7 rounded-[8px] object-contain"
+              :src="item.icon"
+            />
+          </span>
+          <span class="min-w-0 flex-1">
+            <span
+              class="block truncate text-[13.5px] font-medium leading-5 text-glass-text"
+            >
+              <template
+                v-for="(part, partIndex) in titleParts(item.name, item.match)"
+                :key="partIndex"
+              >
+                <mark
+                  v-if="part.match"
+                  class="bg-transparent text-accent"
+                >{{ part.text }}</mark>
+                <template v-else>{{ part.text }}</template>
+              </template>
+            </span>
+            <span
+              class="mt-0.5 block truncate text-[11.5px] leading-4 text-glass-muted"
+            >
+              {{ renderDesc(item.desc) }}
+            </span>
+          </span>
+          <span
+            class="shrink-0 rounded-full border border-line px-1.5 py-0.5 text-[10px] text-glass-muted"
+          >
+            {{ kindLabel(item) }}
+          </span>
+          <span
+            v-if="currentSelect === index"
+            class="keycap shrink-0"
+          >↵</span>
+        </button>
+      </div>
+    </template>
+
+    <div
+      class="mt-2 flex h-8 items-center justify-between border-t border-glass-divider px-2 text-[11px] text-glass-muted"
+    >
+      <span class="flex items-center gap-1.5">
+        <template v-if="options.length || showHome">
+          <span class="keycap">↑↓</span>
+          <span>{{ copy.select }}</span>
+          <span class="keycap">↵</span>
+          <span>{{ copy.open }}</span>
+        </template>
+        <span class="keycap">Esc</span>
+        <span>{{ copy.close }}</span>
+      </span>
+      <span v-if="options.length" class="tabular-nums">
+        {{ currentSelect + 1 }} / {{ options.length }}
+      </span>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, toRaw, watch } from 'vue';
+import { computed, reactive, ref, toRaw } from 'vue';
 import localConfig from '../confOp';
 
 const path = window.require('path');
 const remote = window.require('@electron/remote');
+const { ipcRenderer } = window.require('electron');
 
 const config: any = ref(localConfig.getConfig());
+
+ipcRenderer.on('config-changed', () => {
+  config.value = localConfig.getConfig();
+});
 
 const props: any = defineProps({
   searchValue: {
@@ -70,47 +230,130 @@ const props: any = defineProps({
     type: Number,
     default: 0,
   },
-  currentPlugin: {},
-  pluginHistory: (() => [])(),
-  clipboardFile: (() => [])(),
+  currentPlugin: {
+    type: Object,
+    default: (() => ({}))(),
+  },
+  pluginHistory: {
+    type: Array,
+    default: (() => [])(),
+  },
+  homeItems: {
+    type: Array,
+    default: (() => [])(),
+  },
+  homeTab: {
+    type: String,
+    default: 'recent',
+  },
+  hasPinned: Boolean,
+  hasRecent: Boolean,
+  canExpand: Boolean,
+  expanded: Boolean,
+  clipboardFile: {
+    type: Array,
+    default: (() => [])(),
+  },
 });
 
-const emit = defineEmits(['choosePlugin', 'setPluginHistory']);
+const emit = defineEmits([
+  'choosePlugin',
+  'setPluginHistory',
+  'toggleExpanded',
+  'setHomeTab',
+  'clearSearch',
+]);
 
-const renderTitle = (title, match) => {
-  if (typeof title !== 'string') return;
-  if (!props.searchValue || !match) return title;
-  const result = title.substring(match[0], match[1] + 1);
-  return `<div>${title.substring(
-    0,
-    match[0],
-  )}<span style='color: var(--ant-error-color)'>${result}</span>${title.substring(
-    match[1] + 1,
-    title.length,
-  )}</div>`;
+const copy = computed(() =>
+  config.value.perf.common.lang === 'en-US'
+    ? {
+        pinned: 'Pinned',
+        recent: 'Recent',
+        results: 'Results',
+        expand: 'Show all',
+        collapse: 'Show less',
+        emptyTitle: 'Search apps, plugins and commands',
+        emptyDesc: 'One place for everything you need to launch.',
+        emptyHint: 'Hide the launcher',
+        select: 'Select',
+        open: 'Open',
+        switch: 'Switch',
+        close: 'Hide',
+        app: 'App',
+        plugin: 'Plugin',
+        command: 'Command',
+        noResults: 'No results',
+        noResultsHint: 'Try a shorter keyword or check the search scope.',
+        clearSearch: 'Clear search',
+      }
+    : {
+        pinned: '常用应用',
+        recent: '最近使用',
+        results: '搜索结果',
+        expand: '展开',
+        collapse: '收起',
+        emptyTitle: '搜索应用、插件或命令',
+        emptyDesc: '应用、插件、文件和命令都能在这里找到。',
+        emptyHint: '收起搜索面板',
+        select: '选择',
+        open: '打开',
+        switch: '切换',
+        close: '收起',
+        app: '应用',
+        plugin: '插件',
+        command: '命令',
+        noResults: '没有找到结果',
+        noResultsHint: '试试更短的关键词，或检查搜索范围。',
+        clearSearch: '清除搜索',
+      },
+);
+
+const showHome = computed(
+  () => !props.searchValue && !props.options.length && !!props.homeItems.length,
+);
+
+const homeTitle = computed(() =>
+  props.homeTab === 'pinned' ? copy.value.pinned : copy.value.recent,
+);
+
+const kindLabel = (item: any) => {
+  const kind = item.pluginType || item.type;
+  if (kind === 'app') return copy.value.app;
+  if (
+    kind === 'ui' ||
+    kind === 'system' ||
+    kind === 'plugin' ||
+    item.value === 'plugin'
+  ) {
+    return copy.value.plugin;
+  }
+  return copy.value.command;
+};
+
+const itemLabel = (item: any) =>
+  item.cmd || item.pluginName || item._name || item.name || '';
+
+const titleParts = (title: any, match: any) => {
+  if (typeof title !== 'string') return [];
+  if (!props.searchValue || !match) return [{ text: title, match: false }];
+  const start = Math.max(0, match[0]);
+  const end = Math.min(title.length, match[1] + 1);
+  if (start >= end) return [{ text: title, match: false }];
+  return [
+    { text: title.slice(0, start), match: false },
+    { text: title.slice(start, end), match: true },
+    { text: title.slice(end), match: false },
+  ].filter((part) => part.text);
 };
 
 const renderDesc = (desc = '') => {
   if (desc.length > 80) {
-    return `${desc.substr(0, 63)}...${desc.substr(
+    return `${desc.substring(0, 63)}...${desc.substring(
       desc.length - 14,
       desc.length,
     )}`;
   }
   return desc;
-};
-
-const sort = (options) => {
-  for (let i = 0; i < options.length; i++) {
-    for (let j = i + 1; j < options.length; j++) {
-      if (options[j].zIndex > options[i].zIndex) {
-        let temp = options[i];
-        options[i] = options[j];
-        options[j] = temp;
-      }
-    }
-  }
-  return options.slice(0, 20);
 };
 
 const openPlugin = (item) => {
@@ -181,96 +424,3 @@ const initMainCmdMenus = () => {
 
 initMainCmdMenus();
 </script>
-
-<style lang="less">
-.ellpise {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-}
-
-.contextmenu {
-  margin: 0;
-  background: #fff;
-  z-index: 3000;
-  position: absolute;
-  list-style-type: none;
-  padding: 5px 0;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 400;
-  color: #333;
-  box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.3);
-}
-
-.options {
-  position: absolute;
-  top: 60px;
-  left: 0;
-  width: 100%;
-  z-index: 99;
-  max-height: calc(~'100vh - 60px');
-  overflow: auto;
-  background: var(--color-body-bg);
-  .history-plugins {
-    width: 100%;
-    border-top: 1px dashed var(--color-border-light);
-    box-sizing: border-box;
-    .history-item {
-      cursor: pointer;
-      box-sizing: border-box;
-      height: 69px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      color: var(--color-text-content);
-      border-right: 1px dashed var(--color-border-light);
-      position: relative;
-      .badge {
-        position: absolute;
-        top: 2px;
-        right: 2px;
-        width: 0;
-        height: 0;
-        border-radius: 4px;
-        border-top: 6px solid var(--ant-primary-4);
-        border-right: 6px solid var(--ant-primary-4);
-        border-left: 6px solid transparent;
-        border-bottom: 6px solid transparent;
-      }
-      &.active {
-        background: var(--color-list-hover);
-      }
-    }
-    .name {
-      font-size: 12px;
-      margin-top: 4px;
-      width: 100%;
-      text-align: center;
-    }
-  }
-  .op-item {
-    padding: 0 10px;
-    height: 70px;
-    line-height: 50px;
-    max-height: 500px;
-    overflow: auto;
-    background: var(--color-body-bg);
-    color: var(--color-text-content);
-    border-color: var(--color-border-light);
-    border-bottom: 1px solid var(--color-border-light) !important;
-    &.active {
-      background: var(--color-list-hover);
-    }
-    .ant-list-item-meta-title {
-      color: var(--color-text-content);
-    }
-    .ant-list-item-meta-description {
-      color: var(--color-text-desc);
-    }
-  }
-}
-</style>

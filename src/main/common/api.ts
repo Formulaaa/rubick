@@ -143,8 +143,7 @@ class API extends DBInstance {
         icon: plugin.logo,
       }).show();
     }
-    window.setSize(window.getSize()[0], 60);
-    this.removePlugin(null, window);
+    this.removePlugin(null, window, false);
     // 模板文件
     if (!plugin.main) {
       plugin.tplPath = common.dev()
@@ -179,8 +178,8 @@ class API extends DBInstance {
     }
   }
 
-  public removePlugin(e, window) {
-    runnerInstance.removeView(window);
+  public removePlugin(e, window, resetUI = true) {
+    runnerInstance.removeView(window, resetUI);
     this.currentPlugin = null;
   }
 

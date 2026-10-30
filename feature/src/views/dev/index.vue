@@ -1,57 +1,53 @@
 <template>
-  <div class="dev">
-    <div class="view-title">{{ $t('feature.dev.title') }}</div>
-    <div class="view-container">
-      <a-alert
-        style="margin-bottom: 40px"
-        :message="$t('feature.dev.tips')"
-        type="warning"
-      />
-      <a-form
-        ref="formRef"
-        :model="formState"
-        :rules="rules"
-        :label-col="labelCol"
-        :wrapper-col="wrapperCol"
-      >
-        <a-form-item :label="$t('feature.dev.pluginName')" name="name">
-          <a-input v-model:value="formState.name" />
-        </a-form-item>
-    
-        <a-form-item :wrapper-col="{ span: 14, offset: 4 }">
-          <a-button :loading="loading" type="primary" @click="onSubmit">
-            {{ $t('feature.dev.install') }}
-          </a-button>
-          <a-button @click="refresh" style="margin-left: 10px">
-            {{ $t('feature.dev.refreshPlugins') }}
-          </a-button>
-        </a-form-item>
-      </a-form>
-    </div>
+  <div class="page">
+    <header class="page-header">
+      <div class="min-w-0">
+        <h1 class="page-title">{{ $t('feature.dev.title') }}</h1>
+      </div>
+    </header>
+
+    <GAlert :message="$t('feature.dev.tips')" type="warning" />
+
+    <section class="section-block">
+      <div class="section-head">
+        <span class="section-title">{{ $t('feature.dev.pluginName') }}</span>
+      </div>
+      <div class="surface-section">
+        <div class="field-row">
+          <label class="shrink-0 text-sm text-glass-muted">
+            {{ $t('feature.dev.pluginName') }}
+          </label>
+          <GInput class="max-w-[320px] flex-1" v-model="formState.name" />
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <GButton variant="secondary" @click="refresh">
+          {{ $t('feature.dev.refreshPlugins') }}
+        </GButton>
+        <GButton :loading="loading" variant="primary" @click="onSubmit">
+          {{ $t('feature.dev.install') }}
+        </GButton>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { message } from 'ant-design-vue';
 import { reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { GAlert, GButton, GInput, toast } from '@/components/ui';
 
 const { t } = useI18n();
 
-const formRef = ref();
 const formState = reactive({
   name: undefined,
 });
-const rules = {
-  name: {
-    required: true,
-    message: 'Please input name',
-  },
-};
 const onSubmit = () => {
-  formRef.value.validate().then(() => {
-    downloadPlugin(formState.name);
-  });
+  if (!formState.name) {
+    toast.warning('Please input name');
+    return;
+  }
+  downloadPlugin(formState.name);
 };
 
 const loading = ref(false);
@@ -61,51 +57,20 @@ const downloadPlugin = async (pluginName) => {
     name: pluginName,
     isDev: true,
   });
-  message.success(t('feature.dev.installSuccess', { pluginName: pluginName }));
+  toast.success(t('feature.dev.installSuccess', { pluginName: pluginName }));
   loading.value = false;
 };
 
 const refresh = () => {
-  formRef.value.validate().then(() => {
-    window.market.refreshPlugin({
-      name: formState.name,
-    });
-    message.success(
-      t('feature.dev.refreshSuccess', { pluginName: formState.name }),
-    );
+  if (!formState.name) {
+    toast.warning('Please input name');
+    return;
+  }
+  window.market.refreshPlugin({
+    name: formState.name,
   });
+  toast.success(
+    t('feature.dev.refreshSuccess', { pluginName: formState.name }),
+  );
 };
-
-const labelCol = { span: 4 };
-const wrapperCol = { span: 14 };
 </script>
-
-<style lang="less" scoped>
-.dev {
-  box-sizing: border-box;
-  width: 100%;
-  overflow-x: hidden;
-  height: calc(~'100vh - 34px');
-  .view-title {
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 16px;
-    color: var(--color-text-primary);
-  }
-  .view-container {
-    padding: 10px;
-    box-sizing: border-box;
-    border-radius: 8px;
-    background: var(--color-body-bg);
-    overflow: auto;
-    height: calc(~'100vh - 84px');
-  }
-  :deep(label) {
-    color: var(--color-text-content);
-  }
-  :deep(.ant-input) {
-    background: var(--color-input-hover) !important;
-    color: var(--color-text-content);
-  }
-}
-</style>

@@ -1,244 +1,277 @@
 <template>
-  <div class="settings">
-    <div class="view-title"> {{ $t('feature.settings.title') }}</div>
-    <div class="view-container">
-      <a-menu v-model:selectedKeys="currentSelect" mode="horizontal">
-        <a-menu-item key="userInfo">
-          {{ $t('feature.settings.account.accountInfo') }}
-        </a-menu-item>
-        <a-menu-item key="normal">
-          {{ $t('feature.settings.basic.title') }}
-        </a-menu-item>
-        <a-menu-item key="localstart">
-          {{ $t('feature.settings.localstart.title') }}
-        </a-menu-item>
-        <a-menu-item key="global">
-          {{ $t('feature.settings.global.title') }}
-        </a-menu-item>
-        <!--        <a-menu-item key="superpanel">-->
-        <!--          <template #icon>-->
-        <!--            <FileAddOutlined />-->
-        <!--          </template>-->
-        <!--          {{ $t('feature.settings.superPanel.title') }}-->
-        <!--        </a-menu-item>-->
-        <a-menu-item key="database">
-          {{ $t('feature.settings.database.title') }}
-        </a-menu-item>
-        <a-menu-item key="localhost">
-          {{ $t('feature.settings.intranet.title') }}
-        </a-menu-item>
-      </a-menu>
-      <div class="settings-detail">
-        <UserInfo v-if="currentSelect[0] === 'userInfo'" />
-        <div v-if="currentSelect[0] === 'normal'">
-          <div class="setting-item">
-            <div class="title">
+  <div class="page">
+    <div class="page-header">
+      <div class="min-w-0 flex-1">
+        <div class="page-title">{{ $t('feature.settings.title') }}</div>
+      </div>
+    </div>
+
+    <nav
+      class="flex w-fit max-w-full flex-wrap items-center gap-1 rounded-full border border-line bg-glass-soft p-1"
+    >
+      <button
+        v-for="item in settingTabs"
+        :key="item.key"
+        type="button"
+        class="focus-ring h-8 rounded-full px-3.5 text-[13px] transition-colors duration-150"
+        :class="
+          currentSelect[0] === item.key
+            ? 'bg-accent/15 text-accent'
+            : 'text-glass-muted hover:text-glass-text'
+        "
+        @click="selectTab(item.key)"
+      >
+        {{ $t(item.label) }}
+      </button>
+    </nav>
+
+    <div class="min-w-0 flex-1">
+      <UserInfo v-if="currentSelect[0] === 'userInfo'" />
+
+      <div v-if="currentSelect[0] === 'normal'" class="space-y-6">
+        <section class="section-block">
+          <div class="section-head">
+            <span class="section-title">
               {{ $t('feature.settings.basic.shortcutKey') }}
-            </div>
-            <div class="settings-item-li">
-              <div class="label">
-                {{ $t('feature.settings.basic.showOrHiddle') }}
-              </div>
-              <a-tooltip placement="top" trigger="click">
-                <template #title>
-                  <span>{{ tipText }}</span>
-                  <template v-if="isWindows">
-                    <br />
-                    <span
-                      style="cursor: pointer; text-decoration: underline"
-                      @click="resetDefault('Alt')"
-                    >
-                    Alt+Space
-                  </span>
-                    <span
-                      style="
-                      cursor: pointer;
-                      margin-left: 8px;
-                      text-decoration: underline;
-                    "
-                      @click="resetDefault('Ctrl')"
-                    >
-                    Ctrl+Space
-                  </span>
-                  </template>
-                </template>
-                <div
-                  class="value"
-                  tabIndex="-1"
-                  @keyup="(e) => changeShortCut(e, 'showAndHidden')"
-                >
-                  {{ shortCut.showAndHidden }}
+            </span>
+          </div>
+          <div class="surface-section">
+            <div class="field-row">
+              <div class="min-w-0 flex-1">
+                <div class="text-[13px] text-glass-text">
+                  {{ $t('feature.settings.basic.showOrHiddle') }}
                 </div>
-              </a-tooltip>
+                <div v-if="isWindows" class="mt-1 flex gap-3 text-[11px]">
+                  <button
+                    type="button"
+                    class="focus-ring rounded text-glass-muted underline underline-offset-2 hover:text-accent"
+                    @click="resetDefault('Alt')"
+                  >
+                    Alt+Space
+                  </button>
+                  <button
+                    type="button"
+                    class="focus-ring rounded text-glass-muted underline underline-offset-2 hover:text-accent"
+                    @click="resetDefault('Ctrl')"
+                  >
+                    Ctrl+Space
+                  </button>
+                </div>
+              </div>
+              <div
+                class="focus-ring flex h-9 w-[240px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-line bg-glass-soft px-3 text-[13px] text-glass-text"
+                tabindex="0"
+                :title="tipText"
+                @keyup="(e) => changeShortCut(e, 'showAndHidden')"
+              >
+                {{ shortCut.showAndHidden }}
+              </div>
             </div>
-            <div class="settings-item-li">
-              <div class="label">
+            <div class="field-row">
+              <div class="min-w-0 flex-1 text-[13px] text-glass-text">
                 {{ $t('feature.settings.basic.screenCapture') }}
               </div>
-              <a-tooltip placement="top" trigger="click">
-                <template #title>
-                  <span>{{ tipText }}</span>
-                </template>
-                <div
-                  class="value"
-                  tabIndex="-1"
-                  @keyup="(e) => changeShortCut(e, 'capture')"
-                >
-                  {{ shortCut.capture }}
-                </div>
-              </a-tooltip>
+              <div
+                class="focus-ring flex h-9 w-[240px] shrink-0 cursor-pointer items-center justify-center rounded-[10px] border border-line bg-glass-soft px-3 text-[13px] text-glass-text"
+                tabindex="0"
+                :title="tipText"
+                @keyup="(e) => changeShortCut(e, 'capture')"
+              >
+                {{ shortCut.capture }}
+              </div>
             </div>
           </div>
-          <div class="setting-item">
-            <div class="title">{{ $t('feature.settings.basic.common') }}</div>
-            <div class="settings-item-li">
-              <div class="label">
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <span class="section-title">
+              {{ $t('feature.settings.basic.common') }}
+            </span>
+          </div>
+          <div class="surface-section">
+            <div class="field-row">
+              <div class="min-w-0 flex-1 text-[13px] text-glass-text">
                 {{ $t('feature.settings.basic.autoPaste') }}
               </div>
-              <a-switch
-                v-model:checked="common.autoPast"
-                :checked-children="$t('feature.settings.basic.on')"
-                :un-checked-children="$t('feature.settings.basic.off')"
-              ></a-switch>
+              <GSwitch v-model="common.autoPast" class="focus-ring" />
             </div>
-            <div class="settings-item-li">
-              <div class="label">{{ $t('feature.settings.basic.autoBoot') }}</div>
-              <a-switch
-                v-model:checked="common.start"
-                :checked-children="$t('feature.settings.basic.on')"
-                :un-checked-children="$t('feature.settings.basic.off')"
-              ></a-switch>
+            <div class="field-row">
+              <div class="min-w-0 flex-1 text-[13px] text-glass-text">
+                {{ $t('feature.settings.basic.autoBoot') }}
+              </div>
+              <GSwitch v-model="common.start" class="focus-ring" />
             </div>
-            <div class="settings-item-li">
-              <div class="label">
+            <div class="field-row">
+              <div class="min-w-0 flex-1 text-[13px] text-glass-text">
                 {{ $t('feature.settings.basic.spaceExec') }}
               </div>
-              <a-switch
-                v-model:checked="common.space"
-                :checked-children="$t('feature.settings.basic.on')"
-                :un-checked-children="$t('feature.settings.basic.off')"
-              ></a-switch>
+              <GSwitch v-model="common.space" class="focus-ring" />
             </div>
-            <div class="settings-item-li">
-              <div class="label">
+            <div class="field-row">
+              <div class="min-w-0 flex-1 text-[13px] text-glass-text">
                 {{ $t('feature.settings.basic.history') }}
               </div>
-              <a-switch
-                v-model:checked="common.history"
-                :checked-children="$t('feature.settings.basic.on')"
-                :un-checked-children="$t('feature.settings.basic.off')"
-              ></a-switch>
+              <GSwitch v-model="common.history" class="focus-ring" />
             </div>
           </div>
-          <div class="setting-item">
-            <div class="title">
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <span class="section-title">
               {{ $t('feature.settings.basic.windowPosition') }}
-            </div>
-            <div class="settings-item-li">
-              <div class="label">
-                {{ $t('feature.settings.basic.windowPositionDesc') }}
+            </span>
+          </div>
+          <div class="surface-section">
+            <div class="field-row">
+              <div class="min-w-0 flex-1">
+                <div class="text-[13px] text-glass-text">
+                  {{ $t('feature.settings.basic.windowPositionDesc') }}
+                </div>
               </div>
-              <a-button size="small" @click="resetWindowPosition">
+              <GButton size="sm" @click="resetWindowPosition">
                 {{ $t('feature.settings.basic.resetPosition') }}
-              </a-button>
+              </GButton>
             </div>
           </div>
-          <div class="setting-item">
-            <div class="title">{{ $t('feature.settings.basic.theme') }}</div>
-            <div class="settings-item-li">
-              <div class="label">{{ $t('feature.settings.basic.darkMode') }}</div>
-              <a-switch
-                v-model:checked="common.darkMode"
-                :checked-children="$t('feature.settings.basic.on')"
-                :un-checked-children="$t('feature.settings.basic.off')"
-              ></a-switch>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <span class="section-title">
+              {{ $t('feature.settings.basic.theme') }}
+            </span>
+          </div>
+          <div class="surface-section">
+            <div class="field-row">
+              <div class="min-w-0 flex-1 text-[13px] text-glass-text">
+                {{ $t('feature.settings.basic.darkMode') }}
+              </div>
+              <GSwitch v-model="common.darkMode" class="focus-ring" />
             </div>
           </div>
-          <div class="setting-item">
-            <div class="title">{{ $t('feature.settings.basic.language') }}</div>
-            <div class="settings-item-li">
-              <div class="label">
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <span class="section-title">
+              {{ $t('feature.settings.basic.language') }}
+            </span>
+          </div>
+          <div class="surface-section">
+            <div class="field-row">
+              <div class="min-w-0 flex-1 text-[13px] text-glass-text">
                 {{ $t('feature.settings.basic.changeLang') }}
               </div>
-              <a-select
-                v-model:value="state.common.lang"
-                label-in-value
-                style="width: 240px"
-                :options="options"
-                @change="changeLanguage"
-              ></a-select>
-            </div>
-          </div>
-        </div>
-        <div v-if="currentSelect[0] === 'global'">
-          <a-collapse>
-            <a-collapse-panel
-              key="1"
-              :header="$t('feature.settings.global.instructions')"
-            >
-              <div>
-                {{ $t('feature.settings.global.tips') }}
-              </div>
-              <h3 style="margin-top: 10px">
-                {{ $t('feature.settings.global.example') }}
-              </h3>
-              <a-divider style="margin: 5px 0" />
-              <a-list item-layout="horizontal" :data-source="examples">
-                <template #renderItem="{ item }">
-                  <a-list-item>
-                    <a-list-item-meta :description="item.desc">
-                      <template #title>
-                        <div>{{ item.title }}</div>
-                      </template>
-                    </a-list-item-meta>
-                  </a-list-item>
-                </template>
-              </a-list>
-            </a-collapse-panel>
-          </a-collapse>
-          <div class="feature-container">
-            <div class="keywords item">
-              <div>{{ $t('feature.settings.global.shortcutKey') }}</div>
-              <template :key="index" v-for="(item, index) in global">
-                <a-tooltip placement="top" trigger="click">
-                  <template #title>
-                    <span>{{ tipText }}</span>
-                  </template>
-                  <div
-                    class="value"
-                    tabIndex="2"
-                    @keyup="(e) => changeGlobalKey(e, index)"
-                  >
-                    {{ item.key }}
-                    <MinusCircleOutlined
-                      @click.stop="deleteGlobalKey(e, index)"
-                    />
-                  </div>
-                </a-tooltip>
-              </template>
-            </div>
-            <div class="short-cut item">
-              <div>{{ $t('feature.settings.global.funtionKey') }}</div>
-              <template v-for="(item, index) in global" :key="index">
-                <a-input
-                  :value="item.value"
-                  class="value"
-                  allowClear
-                  :disabled="!item.key"
-                  @change="(e) => changeGlobalValue(index, e.target.value)"
+              <div class="w-[200px] shrink-0">
+                <GSelect
+                  v-model="state.common.lang"
+                  class="w-full"
+                  :options="options"
+                  @change="changeLanguage"
                 />
-              </template>
+              </div>
             </div>
           </div>
-          <div @click="addConfig" class="add-global">
-            <PlusCircleOutlined />
-            {{ $t('feature.settings.global.addShortcutKey') }}
-          </div>
-        </div>
-        <Localhost v-if="currentSelect[0] === 'localhost'" />
-        <LocalStart v-if="currentSelect[0] === 'localstart'" />
-        <DataBase v-if="currentSelect[0] === 'database'" />
+        </section>
       </div>
+
+      <div v-if="currentSelect[0] === 'global'" class="space-y-6">
+        <section class="section-block">
+          <div class="surface-section">
+            <details>
+              <summary
+                class="focus-ring flex cursor-pointer list-none items-center justify-between px-4 py-3 text-[13px] font-medium text-glass-text marker:content-none [&::-webkit-details-marker]:hidden"
+              >
+                {{ $t('feature.settings.global.instructions') }}
+              </summary>
+              <div class="border-t border-line px-4 py-4">
+                <div class="text-[12px] text-glass-muted">
+                  {{ $t('feature.settings.global.tips') }}
+                </div>
+                <h3 class="mt-3 text-[13px] font-semibold text-glass-text">
+                  {{ $t('feature.settings.global.example') }}
+                </h3>
+                <div class="mt-1 flex flex-col divide-y divide-line">
+                  <div
+                    v-for="item in examples"
+                    :key="item.title"
+                    class="py-2.5"
+                  >
+                    <div class="text-[13px] text-glass-text">
+                      {{ item.title }}
+                    </div>
+                    <div class="mt-0.5 text-[11px] text-glass-muted">
+                      {{ item.desc }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <section class="section-block">
+          <div class="section-head">
+            <span class="section-title">
+              {{ $t('feature.settings.global.title') }}
+            </span>
+            <button
+              type="button"
+              class="focus-ring inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[12px] text-accent transition-colors hover:bg-accent/10"
+              @click="addConfig"
+            >
+              <PlusCircleOutlined />
+              {{ $t('feature.settings.global.addShortcutKey') }}
+            </button>
+          </div>
+          <div class="surface-section">
+            <div
+              v-for="(item, index) in global"
+              :key="index"
+              class="field-row"
+            >
+              <div class="min-w-0 flex-1">
+                <div class="text-[11px] text-glass-muted">
+                  {{ $t('feature.settings.global.shortcutKey') }}
+                </div>
+                <div
+                  class="focus-ring group relative mt-1 flex h-9 w-full max-w-[240px] cursor-pointer items-center justify-center rounded-[10px] border border-line bg-glass-soft px-8 text-[13px] text-glass-text"
+                  tabindex="0"
+                  :title="tipText"
+                  @keyup="(e) => changeGlobalKey(e, index)"
+                >
+                  {{ item.key }}
+                  <button
+                    type="button"
+                    class="focus-ring absolute right-1 top-1/2 grid h-6 w-6 -translate-y-1/2 place-items-center rounded-full text-glass-muted opacity-0 transition-opacity hover:text-accent focus-visible:opacity-100 group-hover:opacity-100"
+                    @keyup.stop
+                    @click.stop="deleteGlobalKey($event, index)"
+                  >
+                    <MinusCircleOutlined />
+                  </button>
+                </div>
+              </div>
+              <div class="w-[240px] shrink-0">
+                <div class="text-[11px] text-glass-muted">
+                  {{ $t('feature.settings.global.funtionKey') }}
+                </div>
+                <GInput
+                  :model-value="item.value"
+                  class="mt-1 h-9 rounded-[10px] text-center text-[13px]"
+                  :disabled="!item.key"
+                  @update:model-value="(value) => changeGlobalValue(index, value)"
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <Localhost v-if="currentSelect[0] === 'localhost'" />
+      <LocalStart v-if="currentSelect[0] === 'localstart'" />
+      <DataBase v-if="currentSelect[0] === 'database'" />
     </div>
   </div>
 </template>
@@ -254,10 +287,10 @@ import {
   ToolOutlined,
   UserOutlined,
 } from '@ant-design/icons-vue';
-import { message } from 'ant-design-vue';
 import debounce from 'lodash.debounce';
 import { computed, reactive, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { GButton, GInput, GSelect, GSwitch, toast } from '@/components/ui';
 import localConfig from '@/confOp';
 import DataBase from './database';
 import keycodes from './keycode';
@@ -271,7 +304,7 @@ const { ipcRenderer } = window.require('electron');
 
 const resetWindowPosition = () => {
   window.rubick.resetWindowPosition();
-  message.success(t('feature.settings.basic.resetPositionSuccess'));
+  toast.success(t('feature.settings.basic.resetPositionSuccess'));
 };
 
 const examples = [
@@ -308,6 +341,19 @@ const tipText = computed(() => {
 });
 
 const currentSelect = ref(['userInfo']);
+
+const settingTabs = [
+  { key: 'userInfo', label: 'feature.settings.account.accountInfo' },
+  { key: 'normal', label: 'feature.settings.basic.title' },
+  { key: 'localstart', label: 'feature.settings.localstart.title' },
+  { key: 'global', label: 'feature.settings.global.title' },
+  { key: 'database', label: 'feature.settings.database.title' },
+  { key: 'localhost', label: 'feature.settings.intranet.title' },
+];
+
+const selectTab = (key) => {
+  currentSelect.value = [key];
+};
 
 const { perf, global: defaultGlobal } = localConfig.getConfig();
 
@@ -489,191 +535,9 @@ const options = ref([
   },
 ]);
 
-const changeLanguage = (value) => {
-  state.common.lang = value.key;
-  locale.value = value.key;
+const changeLanguage = (event) => {
+  const value = event?.target?.value ?? event;
+  state.common.lang = value;
+  locale.value = value;
 };
 </script>
-
-<style lang="less">
-@import '@/assets/common.less';
-
-.settings {
-  box-sizing: border-box;
-  width: 100%;
-  overflow-x: hidden;
-  background: var(--color-body-bg2);
-  height: calc(~'100vh - 34px');
-  .ant-menu-horizontal {
-    border-bottom: 1px solid var(--color-border-light);
-  }
-  .view-title {
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 16px;
-    color: var(--color-text-primary);
-  }
-  .view-container {
-    border-radius: 8px;
-    background: var(--color-body-bg);
-    overflow: auto;
-    height: calc(~'100vh - 84px');
-  }
-  .ant-menu {
-    background: var(--color-body-bg) !important;
-    color: var(--color-text-content) !important;
-  }
-
-  .settings-detail {
-    padding: 20px;
-    box-sizing: border-box;
-    flex: 1;
-    overflow: auto;
-    background: var(--color-body-bg);
-
-    .setting-item {
-      margin-bottom: 20px;
-
-      .ant-form-item {
-        margin-bottom: 0;
-      }
-
-      .title {
-        color: var(--ant-primary-color);
-        font-size: 14px;
-        margin-bottom: 10px;
-      }
-
-      .settings-item-li {
-        padding-left: 20px;
-        display: flex;
-        width: 100%;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 10px;
-
-        .label {
-          color: var(--color-text-content);
-        }
-
-        .value {
-          width: 300px;
-          cursor: pointer;
-          text-align: center;
-          border: 1px solid var(--color-border-light);
-          color: var(--ant-primary-color);
-          font-size: 14px;
-          height: 24px;
-          font-weight: lighter;
-          background: var(--color-input-hover);
-          .ant-input {
-            text-align: center;
-            color: var(--ant-primary-color);
-            font-size: 14px;
-            font-weight: lighter;
-            background: var(--color-input-hover);
-          }
-        }
-
-        .ant-switch {
-          &:not(.ant-switch-checked) {
-            background: var(--color-list-hover);
-          }
-        }
-        .ant-select-selector {
-          background: var(--color-input-hover) !important;
-          color: var(--color-text-content);
-        }
-        .ant-input-password-icon, .ant-select-arrow {
-          color: var(--color-action-color);
-        }
-      }
-    }
-  }
-
-  .feature-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 10px;
-    font-size: 14px;
-
-    .item {
-      flex: 1;
-      color: var(--color-text-content);
-    }
-
-    .short-cut {
-      margin-left: 20px;
-    }
-
-    .value {
-      cursor: pointer;
-      text-align: center;
-      border: 1px solid var(--color-border-light);
-      color: var(--ant-primary-color);
-      font-size: 14px;
-      height: 24px;
-      font-weight: lighter;
-      margin-top: 10px;
-      position: relative;
-      background: var(--color-input-hover);
-
-      .ant-input {
-        color: var(--ant-primary-color);
-        font-weight: lighter;
-        background: none;
-      }
-
-      .anticon {
-        color: var(--color-text-desc);
-      }
-
-      &.ant-input-affix-wrapper {
-        display: flex;
-      }
-
-      &:hover {
-        .anticon {
-          display: block;
-          color: var(--color-text-content);
-        }
-      }
-
-      .anticon {
-        position: absolute;
-        display: none;
-        right: 4px;
-        top: 50%;
-        transform: translateY(-50%);
-      }
-    }
-  }
-
-  .add-global {
-    color: var(--ant-primary-color);
-    margin-top: 20px;
-    width: 100%;
-    text-align: center;
-    cursor: pointer;
-  }
-
-  .ant-collapse {
-    background: var(--color-input-hover);
-    .ant-collapse-content {
-      background: var(--color-input-hover);
-      color: var(--color-text-content);
-    }
-
-    h3,
-    .ant-collapse-header,
-    .ant-list-item-meta-title {
-      color: var(--color-text-primary);
-    }
-
-    .ant-list-item-meta-description {
-      color: var(--color-text-desc);
-    }
-  }
-}
-</style>

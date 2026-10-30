@@ -1,9 +1,13 @@
 <template>
-  <div class="tools">
+  <div class="page">
+    <header class="page-header">
+      <div class="min-w-0">
+        <h1 class="page-title">{{ $t('feature.market.searchTool') }}</h1>
+      </div>
+    </header>
     <PluginList
       v-if="tools && !!tools.length"
       @downloadSuccess="downloadSuccess"
-      :title="$t('feature.market.searchTool')"
       :list="tools"
     />
   </div>
@@ -38,11 +42,3 @@ const tools = computed(() => {
   });
 });
 </script>
-
-<style lang="less">
-.worker {
-  width: 100%;
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-</style>

@@ -1,48 +1,66 @@
 <template>
-  <div class="user-info">
-    <div class="settings-container">
-      <div class="setting-item">
-        <div class="title">
+  <div class="space-y-6">
+    <section class="section-block">
+      <div class="section-head">
+        <span class="section-title">
           {{ $t('feature.settings.account.themeColor') }}
-        </div>
-        <div class="settings-item-li">
-          <a-radio-group @change="changeTheme" v-model:value="theme" button-style="solid">
-            <a-radio-button value="SPRING">{{ $t('feature.settings.account.spring') }}</a-radio-button>
-            <a-radio-button value="SUMMER">{{ $t('feature.settings.account.summer') }}</a-radio-button>
-            <a-radio-button value="AUTUMN">{{ $t('feature.settings.account.autumn') }}</a-radio-button>
-            <a-radio-button value="WINTER">{{ $t('feature.settings.account.winter') }}</a-radio-button>
-          </a-radio-group>
-        </div>
+        </span>
       </div>
-      <div class="setting-item">
-        <div class="title">
+      <div
+        class="inline-flex w-fit max-w-full flex-wrap items-center gap-1 rounded-full border border-line bg-glass-soft p-1"
+      >
+        <button
+          v-for="option in themeOptions"
+          :key="option.value"
+          type="button"
+          class="focus-ring h-8 rounded-full px-4 text-[13px] transition-colors duration-150"
+          :class="
+            theme === option.value
+              ? 'bg-accent/15 text-accent'
+              : 'text-glass-muted hover:text-glass-text'
+          "
+          @click="selectTheme(option.value)"
+        >
+          {{ $t(option.label) }}
+        </button>
+      </div>
+    </section>
+
+    <section class="section-block">
+      <div class="section-head">
+        <span class="section-title">
           {{ $t('feature.settings.account.personalized') }}
-        </div>
-        <div class="settings-item-li">
-          <div class="label">
+        </span>
+      </div>
+      <div class="surface-section">
+        <div class="field-row">
+          <div class="min-w-0 flex-1 text-[13px] text-glass-text">
             {{ $t('feature.settings.account.greeting') }}
           </div>
-          <a-input v-model:value="custom.placeholder" class="value"></a-input>
+          <GInput v-model="custom.placeholder" class="!w-[280px] shrink-0" />
         </div>
-        <div class="settings-item-li">
-          <div class="label">
+        <div class="field-row">
+          <div class="min-w-0 flex-1 text-[13px] text-glass-text">
             {{ $t('feature.settings.account.name') }}
           </div>
-          <a-input v-model:value="custom.username" class="value"></a-input>
+          <GInput v-model="custom.username" class="!w-[280px] shrink-0" />
         </div>
-        <div class="settings-item-li">
-          <div class="label">
+        <div class="field-row">
+          <div class="min-w-0 flex-1 text-[13px] text-glass-text">
             {{ $t('feature.settings.account.logo') }}
           </div>
-          <div class="img-container">
-            <img class="custom-img" :src="custom.logo" />
-            <a-button class="btn" @click="changeLogo" shape="round" size="small" type="primary">
+          <div class="flex shrink-0 items-center gap-3">
+            <img
+              class="h-11 w-11 rounded-xl object-cover ring-1 ring-white/15"
+              :src="custom.logo"
+            />
+            <GButton variant="primary" size="sm" @click="changeLogo">
               {{ $t('feature.settings.account.replace') }}
-            </a-button>
+            </GButton>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -50,6 +68,7 @@
 import debounce from 'lodash.debounce';
 import { reactive, ref, toRefs, watch } from 'vue';
 import * as Themes from '@/assets/constans';
+import { GButton, GInput } from '@/components/ui';
 import localConfig from '@/confOp';
 
 const { ipcRenderer } = window.require('electron');
@@ -65,6 +84,13 @@ const state = reactive({
 const { perf } = localConfig.getConfig();
 
 const theme = ref(perf.custom.theme);
+
+const themeOptions = [
+  { value: 'SPRING', label: 'feature.settings.account.spring' },
+  { value: 'SUMMER', label: 'feature.settings.account.summer' },
+  { value: 'AUTUMN', label: 'feature.settings.account.autumn' },
+  { value: 'WINTER', label: 'feature.settings.account.winter' },
+];
 
 state.custom = perf.custom || {};
 
@@ -116,6 +142,11 @@ const changeTheme = () => {
   };
 };
 
+const selectTheme = (value) => {
+  theme.value = value;
+  changeTheme();
+};
+
 // const reset = () => {
 //   Modal.warning({
 //     title: '确定恢复默认设置吗？',
@@ -128,46 +159,3 @@ const changeTheme = () => {
 //   });
 // };
 </script>
-
-<style lang="less">
-.ant-radio-button-wrapper {
-  background: var(--color-body-bg);
-  color: var(--color-text-content);
-}
-.user-info-result {
-  padding: 0;
-  .theme-preview {
-    width: 20px;
-    height: 20px;
-    border-radius: 100%;
-  }
-  &.ant-result {
-    padding: 24px;
-  }
-  .icon {
-    font-size: 48px;
-  }
-  .ant-result-icon {
-    margin-bottom: 12px;
-  }
-  .ant-result-title {
-    font-size: 18px;
-  }
-}
-.img-container {
-  width: 300px;
-  .btn {
-    margin-left: 10px;
-    font-size: 12px;
-  }
-}
-.custom-img {
-  width: 60px;
-  height: 60px;
-}
-.footer-btn {
-  text-align: right;
-  border-top: 1px dashed #ddd;
-  padding-top: 12px;
-}
-</style>

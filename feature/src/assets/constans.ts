@@ -1,35 +1,35 @@
 export const SPRING = {
   theme: 'SPRING',
-  primaryColor: '#ff4ea4',
-  errorColor: '#ed6d46',
-  warningColor: '#e5a84b',
-  successColor: '#c0d695',
-  infoColor: '#aa8eeB',
+  primaryColor: '#ff7aa2',
+  errorColor: '#fb7185',
+  warningColor: '#fbbf24',
+  successColor: '#4ade80',
+  infoColor: '#a78bfa',
 };
 
 export const SUMMER = {
   theme: 'SUMMER',
-  primaryColor: '#6078ea',
-  errorColor: '#ed6d46',
-  warningColor: '#e5a84b',
-  successColor: '#c0d695',
-  infoColor: '#aa8eeB',
+  primaryColor: '#5b8cff',
+  errorColor: '#fb7185',
+  warningColor: '#fbbf24',
+  successColor: '#34d399',
+  infoColor: '#60a5fa',
 };
 
 export const AUTUMN = {
   theme: 'AUTUMN',
-  primaryColor: '#f55555',
-  errorColor: '#ed6d46',
-  warningColor: '#e5a84b',
-  successColor: '#c0d695',
-  infoColor: '#aa8eeB',
+  primaryColor: '#ff9f5a',
+  errorColor: '#ef4444',
+  warningColor: '#f59e0b',
+  successColor: '#4ade80',
+  infoColor: '#a78bfa',
 };
 
 export const WINTER = {
   theme: 'WINTER',
-  primaryColor: '#00b294',
-  errorColor: '#e94829',
-  warningColor: '#ed6d3d',
-  successColor: '#c3d94e',
-  infoColor: '#bfa782',
+  primaryColor: '#7c6cff',
+  errorColor: '#fb7185',
+  warningColor: '#fbbf24',
+  successColor: '#34d399',
+  infoColor: '#60a5fa',
 };

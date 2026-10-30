@@ -35,10 +35,9 @@ const registerHotKey = (mainWindow: BrowserWindow): void => {
   const setDarkMode = async () => {
     const config = await localConfig.getConfig();
     const isDark = config.perf.common.darkMode;
-    const backgroundColor = isDark ? '#1c1c28' : '#fff';
-    mainWindow.setBackgroundColor(backgroundColor);
+    mainWindow.setBackgroundColor('#00000000');
     mainWindow.getBrowserViews().forEach((view) => {
-      view.setBackgroundColor?.(backgroundColor);
+      view.setBackgroundColor?.('#00000000');
     });
     if (isDark) {
       nativeTheme.themeSource = 'dark';

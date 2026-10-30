@@ -1,31 +1,53 @@
 <template>
-  <div class="file-container" @drop.prevent="dropFile" @dragenter="checkDrop" @dragover="checkDrop">
-    <a-alert message="可拖放文件夹到这里加入启动" type="info" show-icon />
-    <a-list item-layout="horizontal" :data-source="localStartList">
-      <template #renderItem="{ item }">
-        <a-list-item>
-          <template #actions>
-            <a key="list-loadmore-edit" @click="() => remove(item)">移除</a>
-          </template>
-          <a-list-item-meta :description="item.desc">
-            <template #title>
-              <div>
-                <span :class="item.del ? 'del-title' : ''">{{item.name}}</span>
-                <span v-if="item.del" class="has-del">文件不存在</span>
-              </div>
-            </template>
-            <template #avatar>
-              <a-avatar shape="square" :src="item.icon" />
-            </template>
-          </a-list-item-meta>
-        </a-list-item>
-      </template>
-    </a-list>
+  <div
+    class="space-y-4"
+    @drop.prevent="dropFile"
+    @dragenter="checkDrop"
+    @dragover="checkDrop"
+  >
+    <GAlert
+      message="可拖放文件夹到这里加入启动"
+      type="info"
+    />
+
+    <div v-if="localStartList.length" class="row-list">
+      <div
+        v-for="item in localStartList"
+        :key="item.desc"
+        class="row-item"
+      >
+        <GAvatar :src="item.icon" :size="36" />
+        <div class="min-w-0 flex-1">
+          <div class="truncate text-[13px] text-glass-text">
+            <span :class="item.del ? 'line-through decoration-red-500' : ''">{{
+              item.name
+            }}</span>
+            <span v-if="item.del" class="ml-1.5 text-[11px] text-red-500">
+              文件不存在
+            </span>
+          </div>
+          <div class="truncate text-[11px] text-glass-muted">
+            {{ item.desc }}
+          </div>
+        </div>
+        <GButton variant="ghost" size="sm" @click="remove(item)">
+          移除
+        </GButton>
+      </div>
+    </div>
+
+    <div
+      v-else
+      class="surface-section flex min-h-[120px] items-center justify-center px-6 text-center text-[12px] text-glass-muted"
+    >
+      将文件夹拖放到这里加入启动
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
+import { GAlert, GAvatar, GButton } from '@/components/ui';
 
 const fs = window.require('fs');
 const process = window.require('process');
@@ -89,22 +111,3 @@ const checkDrop = (e) => {
   e.preventDefault();
 };
 </script>
-
-<style lang="less">
-.file-container {
-  box-sizing: border-box;
-  width: 100%;
-  overflow-x: hidden;
-  background: var(--color-body-bg);
-  height: calc(~'100vh - 180px');
-  .del-title {
-    text-decoration-line: line-through;
-    text-decoration-color: var(--ant-error-color);
-  }
-  .has-del {
-    color: var(--ant-error-color);
-    font-size: 12px;
-    margin-left: 6px;
-  }
-}
-</style>

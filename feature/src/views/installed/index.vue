@@ -1,108 +1,191 @@
 <template>
-  <div class="installed">
-    <div class="view-title">{{ $t('feature.installed.title') }}</div>
-    <div class="view-container">
-      <div v-if="!localPlugins.length">
-        <a-result
-          class="error-content"
-          sub-title="哎呀，暂时还没有安装任何插件！"
-        >
-          <template #icon>
-            <Vue3Lottie :animationData="emptyJson" :height="240" :width="240" />
-          </template>
-          <template #extra>
-            <a-button @click="gotoFinder" key="console" type="primary">去插件市场看看吧</a-button>
-          </template>
-        </a-result>
+  <div class="page">
+    <header class="page-header">
+      <div class="min-w-0 flex-1">
+        <h1 class="page-title">{{ $t('feature.installed.title') }}</h1>
       </div>
-      <div class="container" v-else>
-        <div class="installed-list">
+    </header>
+
+    <div v-if="!localPlugins.length" class="surface-section">
+      <GEmpty
+        title=""
+        :description="$t('feature.installed.tips1')"
+        class="[&>div:first-child]:h-auto [&>div:first-child]:w-auto [&>div:first-child]:bg-transparent [&>div:first-child]:ring-0"
+      >
+        <template #icon>
+          <Vue3Lottie :animationData="emptyJson" :height="240" :width="240" />
+        </template>
+        <template #action>
+          <GButton variant="primary" @click="gotoFinder">
+            {{ $t('feature.installed.tips2') }}
+          </GButton>
+        </template>
+      </GEmpty>
+    </div>
+
+    <template v-else>
+      <section class="section-block">
+        <div class="row-list">
           <div
-            :class="currentSelect[0] === plugin.name ? 'item active' : 'item'"
-            :key="index"
-            @click="currentSelect = [plugin.name]"
             v-for="(plugin, index) in localPlugins"
+            :key="plugin.name || index"
+            class="row-item text-glass-text"
+            :class="currentSelect[0] === plugin.name ? 'bg-accent/10' : ''"
           >
-            <img :src="plugin.logo" />
-            <div class="info">
-              <div class="title">
-                {{ plugin.pluginName }}
-              </div>
-              <div class="desc">{{ plugin.description }}</div>
-            </div>
+            <button
+              type="button"
+              class="focus-ring flex min-w-0 flex-1 items-center gap-3 rounded-xl text-left"
+              @click="currentSelect = [plugin.name]"
+            >
+              <span class="icon-plinth">
+                <img
+                  :src="plugin.logo"
+                  :alt="plugin.pluginName"
+                  class="h-7 w-7 object-contain"
+                />
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="flex items-center gap-2">
+                  <span
+                    class="truncate text-[13px] font-medium"
+                    :class="
+                      currentSelect[0] === plugin.name
+                        ? 'text-accent'
+                        : 'text-glass-text'
+                    "
+                  >
+                    {{ plugin.pluginName }}
+                  </span>
+                  <GTag v-if="plugin.version">{{ plugin.version }}</GTag>
+                </span>
+                <span class="mt-0.5 block truncate text-xs text-glass-muted">
+                  {{ plugin.description }}
+                </span>
+                <span class="mt-1 flex items-center gap-2 text-[10.5px] text-glass-muted">
+                  <span v-if="plugin.author" class="truncate">@{{ plugin.author }}</span>
+                  <span class="text-emerald-600 dark:text-emerald-400">
+                    {{ $t('feature.market.installed') }}
+                  </span>
+                </span>
+              </span>
+            </button>
+            <span class="ml-auto flex shrink-0 items-center gap-2 pl-3">
+              <GButton
+                variant="danger"
+                size="sm"
+                :loading="plugin.isloading"
+                @click.stop="deletePlugin(plugin)"
+              >
+                {{ $t('feature.installed.remove') }}
+              </GButton>
+            </span>
           </div>
         </div>
-        <div class="plugin-detail">
-          <div class="plugin-top">
-            <div class="left">
-              <div class="title">
-                {{ pluginDetail.pluginName }}
-                <a-tag>{{ pluginDetail.version }}</a-tag>
+      </section>
+
+      <section v-if="pluginDetail.name" class="section-block">
+        <div class="section-head">
+          <div class="flex min-w-0 items-center gap-2">
+            <span class="section-title truncate text-[15px]">
+              {{ pluginDetail.pluginName }}
+            </span>
+            <GTag v-if="pluginDetail.version">{{ pluginDetail.version }}</GTag>
+          </div>
+        </div>
+
+        <div class="surface-section">
+          <div class="field-row items-start">
+            <div class="min-w-0 flex-1">
+              <div class="text-[13px] text-glass-text">
+                {{ pluginDetail.description }}
               </div>
-              <div class="desc">
+              <div class="mt-1 text-xs text-glass-muted">
                 {{ $t('feature.installed.developer') }}：{{
                   `${pluginDetail.author || $t('feature.installed.unknown')}`
                 }}
               </div>
-              <div class="desc">
-                {{ pluginDetail.description }}
-              </div>
-            </div>
-            <div class="right">
-              <a-button
-                type="primary"
-                size="small"
-                shape="round"
-                :loading="pluginDetail.isloading"
-                @click="deletePlugin(pluginDetail)"
-              >
-                {{ $t('feature.installed.remove') }}
-              </a-button>
             </div>
           </div>
-          <div class="feature-container">
+        </div>
+
+        <div class="section-block">
+          <div class="section-head">
+            <span class="section-title">
+              {{ $t('feature.installed.functionKey') }}
+            </span>
+          </div>
+          <div class="surface-section">
             <template
               :key="index"
               v-for="(item, index) in pluginDetail.features"
             >
               <div
-                class="desc-item"
                 v-if="item.cmds.filter(cmd => !cmd.label).length > 0"
+                class="field-row flex-col items-start justify-start gap-2"
               >
-                <div>{{ item.explain }}</div>
-                <template :key="cmd" v-for="cmd in item.cmds">
-                  <a-dropdown
-                    v-if="!cmd.label"
-                    :class="{ executable: !cmd.label }"
-                  >
-                    <template #overlay>
-                      <a-menu @click="({key}) => handleMenuClick(key, item, cmd)">
-                        <a-menu-item key="open">
-                          <CaretRightOutlined />
-                          运行
-                        </a-menu-item>
-                        <a-menu-item v-if="!hasAdded(cmd)" key="add">
-                          <PushpinOutlined />
-                          固定到超级面板
-                        </a-menu-item>
-                        <a-menu-item v-else key="remove">
-                          <PushpinFilled />
-                          从超级面板中取消固定
-                        </a-menu-item>
-                      </a-menu>
-                    </template>
-                    <a-button size="small" class="keyword-tag">
+                <div class="text-[13px] text-glass-text">{{ item.explain }}</div>
+                <div class="flex flex-wrap gap-2">
+                  <template :key="cmd" v-for="cmd in item.cmds">
+                    <GButton
+                      v-if="!cmd.label"
+                      size="sm"
+                      @click.stop="toggleMenu(cmd, item, $event)"
+                    >
                       {{ cmd.label || cmd }}
-                      <DownOutlined />
-                    </a-button>
-                  </a-dropdown>
-                </template>
+                      <DownOutlined class="ml-1" />
+                    </GButton>
+                  </template>
+                </div>
               </div>
             </template>
           </div>
         </div>
+      </section>
+    </template>
+
+    <Teleport to="body">
+      <div
+        v-if="openMenu !== null"
+        class="fixed inset-0 z-[2500]"
+        @click="openMenu = null"
+      >
+        <div
+          class="surface-section absolute min-w-[180px] rounded-glass-sm p-1 shadow-[var(--shadow-popover)]"
+          :style="{
+            top: `${menuPosition.top}px`,
+            left: `${menuPosition.left}px`,
+          }"
+          @click.stop
+        >
+          <button
+            type="button"
+            class="focus-ring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-glass-text transition-colors hover:bg-glass-soft"
+            @click.stop="selectMenu('open')"
+          >
+            <CaretRightOutlined />
+            运行
+          </button>
+          <button
+            v-if="!hasAdded(menuCmd)"
+            type="button"
+            class="focus-ring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-glass-text transition-colors hover:bg-glass-soft"
+            @click.stop="selectMenu('add')"
+          >
+            <PushpinOutlined />
+            固定到超级面板
+          </button>
+          <button
+            v-else
+            type="button"
+            class="focus-ring flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-glass-text transition-colors hover:bg-glass-soft"
+            @click.stop="selectMenu('remove')"
+          >
+            <PushpinFilled />
+            从超级面板中取消固定
+          </button>
+        </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
@@ -113,12 +196,11 @@ import {
   PushpinFilled,
   PushpinOutlined,
 } from '@ant-design/icons-vue';
-import { message } from 'ant-design-vue';
 import { computed, ref, toRaw, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-
 import emptyJson from '@/assets/lottie/empty.json';
+import { GButton, GEmpty, GTag, toast } from '@/components/ui';
 
 const { ipcRenderer } = window.require('electron');
 const path = window.require('path');
@@ -160,6 +242,26 @@ const superPanelPlugins = ref(
     _id: 'super-panel-user-plugins',
   },
 );
+
+const openMenu = ref(null);
+const menuItem = ref(null);
+const menuCmd = ref(null);
+const menuPosition = ref({ top: 0, left: 0 });
+const toggleMenu = (cmd, item, event) => {
+  if (openMenu.value === cmd) {
+    openMenu.value = null;
+    return;
+  }
+  openMenu.value = cmd;
+  menuItem.value = item;
+  menuCmd.value = cmd;
+  const rect = event.currentTarget.getBoundingClientRect();
+  menuPosition.value = { top: rect.bottom + 4, left: rect.left };
+};
+const selectMenu = (key) => {
+  handleMenuClick(key, menuItem.value, menuCmd.value);
+  openMenu.value = null;
+};
 
 const handleMenuClick = (key, item, cmd) => {
   if (key === 'open') {
@@ -234,7 +336,7 @@ const deletePlugin = async (plugin) => {
   startUnDownload(plugin.name);
   const timer = setTimeout(() => {
     errorUnDownload(plugin.name);
-    message.error('卸载超时，请重试！');
+    toast.error('卸载超时，请重试！');
   }, 20000);
   await window.market.deletePlugin(plugin);
   removePluginToSuperPanel({ name: plugin.name });
@@ -247,153 +349,3 @@ const gotoFinder = () => {
   store.commit('commonUpdate', { active: ['finder'] });
 };
 </script>
-
-<style lang="less" scoped>
-.installed {
-  box-sizing: border-box;
-  width: 100%;
-  overflow: hidden;
-  height: calc(~'100vh - 34px');
-  .view-title {
-    font-size: 16px;
-    font-weight: 500;
-    margin-bottom: 16px;
-    color: var(--color-text-primary);
-  }
-  .view-container {
-    border-radius: 8px;
-    background: var(--color-body-bg);
-    overflow: auto;
-    height: calc(~'100vh - 84px');
-  }
-  :deep(.ant-result-title) {
-    color: var(--color-text-primary);
-  }
-  :deep(.ant-result-subtitle) {
-    color: var(--color-text-desc);
-  }
-  .keyword-tag {
-    font-size: 13px;
-    margin: 4px;
-  }
-
-  .container {
-    box-sizing: border-box;
-    width: 100%;
-    overflow: hidden;
-    background: #f3efef;
-    height: 100%;
-    display: flex;
-  }
-
-  .installed-list {
-    width: 38%;
-    background: var(--color-body-bg);
-    height: 100%;
-    padding: 10px 0;
-    border-right: 1px solid var(--color-border-light);
-    overflow: auto;
-
-    .item {
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      color: var(--color-text-content);
-      border-bottom: 1px dashed var(--color-border-light);
-      cursor: pointer;
-      &:last-child {
-        border-bottom: none;
-      }
-      img {
-        width: 34px;
-        height: 34px;
-        margin-right: 12px;
-      }
-
-      .desc {
-        font-size: 12px;
-        color: var(--color-text-desc);
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        -webkit-line-clamp: 2;
-        text-overflow: ellipsis;
-      }
-
-      &.active {
-        color: var(--ant-primary-color);
-        background: var(--color-list-hover);
-      }
-    }
-  }
-
-  .plugin-detail {
-    padding: 20px 20px 0 20px;
-    box-sizing: border-box;
-    width: 62%;
-    height: 100%;
-    background: var(--color-body-bg);
-    .plugin-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 12px;
-      margin-bottom: 12px;
-      .title {
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        color: var(--color-text-primary);
-        .ant-tag {
-          background: var(--color-input-hover);
-          border: 1px solid var(--color-border-light);
-          color: var(--color-text-content);
-          margin-left: 8px;
-        }
-      }
-
-      .desc {
-        font-size: 13px;
-        color: var(--color-text-desc);
-      }
-    }
-
-    .detail-container,
-    .feature-container {
-      height: 380px;
-      overflow: auto;
-      color: var(--color-text-content);
-      img {
-        width: 100%;
-      }
-    }
-
-    .desc-item {
-      padding: 10px 0;
-      color: var(--color-text-content);
-      .ant-tag {
-        margin-top: 6px;
-
-        &.executable {
-          cursor: pointer;
-          color: var(--ant-info-color);
-          &:hover {
-            transform: translateY(-2px);
-          }
-        }
-      }
-
-      .desc-title {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      .desc-info {
-        color: var(--color-text-desc);
-      }
-    }
-  }
-}
-</style>

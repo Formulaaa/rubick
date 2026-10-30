@@ -1,9 +1,13 @@
 <template>
-  <div class="system">
+  <div class="page">
+    <header class="page-header">
+      <div class="min-w-0">
+        <h1 class="page-title">{{ $t('feature.market.systemTool') }}</h1>
+      </div>
+    </header>
     <PluginList
       v-if="system && !!system.length"
       @downloadSuccess="downloadSuccess"
-      :title="$t('feature.market.systemTool')"
       :list="system"
     />
   </div>
@@ -38,11 +42,3 @@ const system = computed(() => {
   });
 });
 </script>
-
-<style lang="less">
-.system {
-  width: 100%;
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-</style>

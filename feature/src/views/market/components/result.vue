@@ -1,20 +1,26 @@
 <template>
-  <div class="result">
+  <div class="page">
+    <header class="page-header">
+      <div class="min-w-0">
+        <h1 class="page-title">{{ $t('feature.market.searchResult') }}</h1>
+        <p v-if="searchValue" class="page-desc">{{ searchValue }}</p>
+      </div>
+    </header>
     <PluginList
       v-if="result && !!result.length"
       @downloadSuccess="downloadSuccess"
-      :title="$t('feature.market.searchResult')"
       :list="result"
     />
-    <a-result
-      class="error-content"
+    <GEmpty
       v-else
-      sub-title="哎呀，暂时还没有这个插件哟！"
+      title=""
+      description="哎呀，暂时还没有这个插件哟！"
+      class="[&>div:first-child]:h-auto [&>div:first-child]:w-auto [&>div:first-child]:bg-transparent [&>div:first-child]:ring-0"
     >
       <template #icon>
         <Vue3Lottie :animationData="emptyJson" :height="240" :width="240" />
       </template>
-    </a-result>
+    </GEmpty>
   </div>
 </template>
 
@@ -22,6 +28,7 @@
 import { computed } from 'vue';
 import { useStore } from 'vuex';
 import emptyJson from '@/assets/lottie/empty.json';
+import { GEmpty } from '@/components/ui';
 import PluginList from './plugin-list.vue';
 
 const store = useStore();
@@ -44,14 +51,3 @@ const result = computed(() => {
   }
 });
 </script>
-
-<style lang="less">
-.result {
-  width: 100%;
-  overflow-x: hidden;
-  box-sizing: border-box;
-  .error-content {
-    padding-top: 40px;
-  }
-}
-</style>

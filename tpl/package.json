@@ -18,6 +18,8 @@
     "less": "^4.9.1",
     "typescript": "5.9.3",
     "vite": "^8.3.5",
-    "vue-tsc": "3.3.13"
+    "vue-tsc": "3.3.13",
+    "tailwindcss": "4.3.3",
+    "@tailwindcss/vite": "4.3.3"
   }
 }

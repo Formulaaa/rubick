@@ -1,49 +1,50 @@
 <template>
-  <p>{{ $t('feature.settings.superPanel.tips') }}</p>
-  <div class="super-list-item panel-item">
-    <a-list
-      :grid="{ gutter: 16, column: 2 }"
-      :data-source="localPlugins.filter((item) => !!item)"
-    >
-      <template #renderItem="{ item }">
-        <a-list-item v-if="item">
-          <template #actions>
-            <a-button
-              v-if="!hasAdded(item)"
-              @click="addPluginToSuperPanel(item)"
-              style="color: #7ec699"
-              type="text"
-            >
-              {{ $t('feature.settings.superPanel.add') }}
-            </a-button>
-            <a-button
-              v-else
-              @click="removePluginToSuperPanel(item)"
-              style="color: #ff4ea4"
-              type="text"
-            >
-              {{ $t('feature.settings.superPanel.remove') }}
-            </a-button>
-          </template>
-          <a-list-item-meta>
-            <template #description>
-              <span class="ellipse">{{ item.description }}</span>
-            </template>
-            <template #title>
-              <span class="ellipse">{{ item.pluginName }}</span>
-            </template>
-            <template #avatar>
-              <a-avatar :src="item.logo" />
-            </template>
-          </a-list-item-meta>
-        </a-list-item>
-      </template>
-    </a-list>
+  <div class="space-y-4">
+    <p class="text-[12px] text-glass-muted">
+      {{ $t('feature.settings.superPanel.tips') }}
+    </p>
+
+    <div class="surface-section grid grid-cols-2 gap-1 p-1">
+      <div
+        v-for="item in localPlugins.filter((item) => !!item)"
+        :key="item.name"
+        class="flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-glass-soft"
+      >
+        <GAvatar :src="item.logo" :size="36" />
+        <div class="min-w-0 flex-1">
+          <div class="truncate text-[13px] text-glass-text">
+            {{ item.pluginName }}
+          </div>
+          <div class="truncate text-[11px] text-glass-muted">
+            {{ item.description }}
+          </div>
+        </div>
+        <GButton
+          v-if="!hasAdded(item)"
+          variant="ghost"
+          size="sm"
+          class="text-emerald-500!"
+          @click="addPluginToSuperPanel(item)"
+        >
+          {{ $t('feature.settings.superPanel.add') }}
+        </GButton>
+        <GButton
+          v-else
+          variant="ghost"
+          size="sm"
+          class="text-accent!"
+          @click="removePluginToSuperPanel(item)"
+        >
+          {{ $t('feature.settings.superPanel.remove') }}
+        </GButton>
+      </div>
+    </div>
   </div>
 </template>
 <script setup>
 import { computed, ref, toRaw } from 'vue';
 import { useStore } from 'vuex';
+import { GAvatar, GButton } from '@/components/ui';
 
 const store = useStore();
 const localPlugins = computed(() =>
@@ -87,13 +88,3 @@ const removePluginToSuperPanel = (plugin) => {
   window.rubick.db.put(toRaw(superPanelPlugins.value));
 };
 </script>
-<style lang="less" scoped>
-p {
-  color: var(--color-text-primary);
-}
-.super-list-item.panel-item {
-  &:after {
-    display: none;
-  }
-}
-</style>

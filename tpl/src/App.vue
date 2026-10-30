@@ -1,5 +1,7 @@
 <template>
-  <router-view />
+  <div class="app-aurora fixed inset-0 overflow-hidden text-glass-text">
+    <router-view />
+  </div>
 </template>
 
 <script setup>
@@ -22,10 +24,3 @@ window.rubick.onPluginEnter(({ code, type, payload }) => {
   });
 });
 </script>
-
-<style>
-* {
-  margin: 0;
-  padding: 0;
-}
-</style>

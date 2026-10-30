@@ -1,16 +1,36 @@
 <template>
-  <div class="list-container">
-    <div class="options" v-show="!!(lists || []).length">
+  <div class="launcher-stage h-full w-full p-2">
+    <div
+      class="launcher-surface flex h-full w-full flex-col overflow-hidden rounded-[24px] p-2"
+    >
       <div
-        :key="index"
-        :class="currentSelect === index ? 'active op-item' : 'op-item'"
-        v-for="(item, index) in lists"
-        @click="select(item)"
+        class="row-list glass-scroll max-h-full overflow-auto"
+        v-show="!!(lists || []).length"
       >
-        <img v-if="item.icon" class="icon" :src="item.icon" />
-        <div class="content">
-          <div class="title">{{ item.title }}</div>
-          <div class="desc">{{ decodeURIComponent(item.description) }}</div>
+        <div
+          :key="index"
+          :class="[
+            'row-item relative cursor-pointer text-left',
+            currentSelect === index ? 'bg-accent/10' : '',
+          ]"
+          v-for="(item, index) in lists"
+          @click="select(item)"
+        >
+          <span
+            v-if="currentSelect === index"
+            class="absolute left-1 top-1/2 h-6 w-[2px] -translate-y-1/2 rounded-full bg-accent"
+          />
+          <span v-if="item.icon" class="icon-plinth h-9 w-9">
+            <img class="h-7 w-7 rounded-full object-cover" :src="item.icon" />
+          </span>
+          <div class="content min-w-0 flex-1">
+            <div class="title truncate text-[13.5px] font-medium text-glass-text">
+              {{ item.title }}
+            </div>
+            <div class="desc truncate text-[11.5px] text-glass-muted">
+              {{ decodeURIComponent(item.description) }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -26,7 +46,7 @@ const route = useRoute();
 
 const itemHeight = 60;
 const itemMaxNum = 10;
-const defaultHeight = 60;
+const defaultHeight = 16;
 
 const { code, type, payload } = route.params;
 const current = window.exports[code];
@@ -93,49 +113,3 @@ onBeforeUnmount(() => {
   window.removeEventListener('keydown', onKeydownAction);
 });
 </script>
-<style>
-.options {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  z-index: 99;
-  max-height: calc(100vh);
-  overflow: auto;
-}
-.options::-webkit-scrollbar {
-  width: 0;
-}
-.op-item {
-  padding: 0 10px;
-  height: 60px;
-  max-height: 500px;
-  overflow: auto;
-  background: #fafafa;
-  display: flex;
-  align-items: center;
-  font-size: 14px;
-  text-align: left;
-}
-.icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 100%;
-  margin-right: 10px;
-}
-.title {
-  width: 500px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.desc {
-  color: #999;
-  width: 500px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.op-item.active {
-  background: #dee2e8;
-}
-</style>

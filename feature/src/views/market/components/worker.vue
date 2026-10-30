@@ -1,9 +1,13 @@
 <template>
-  <div class="worker">
+  <div class="page">
+    <header class="page-header">
+      <div class="min-w-0">
+        <h1 class="page-title">{{ $t('feature.market.efficiency') }}</h1>
+      </div>
+    </header>
     <PluginList
       v-if="system && !!system.length"
       @downloadSuccess="downloadSuccess"
-      :title="$t('feature.market.efficiency')"
       :list="system"
     />
   </div>
@@ -38,11 +42,3 @@ const system = computed(() => {
   });
 });
 </script>
-
-<style lang="less">
-.worker {
-  width: 100%;
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-</style>

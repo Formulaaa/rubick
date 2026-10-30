@@ -1,24 +1,46 @@
 <template>
-  <div :class="[process.platform, 'detach']">
-    <div class="info">
-      <img :src="plugInfo.logo"/>
+  <div
+    :class="[
+      process.platform,
+      'detach app-aurora glass-panel fixed inset-x-0 top-0 flex h-[60px] w-full flex-1 select-none items-center justify-between box-border pl-2.5 font-sans text-lg font-medium text-glass-text [&.darwin]:pl-20 [&.darwin]:[-webkit-app-region:drag] [&.win32]:[-webkit-app-region:drag]',
+    ]"
+  >
+    <div class="info flex items-center">
+      <img :src="plugInfo.logo" class="mr-2.5 h-9 w-9 shrink-0" />
       <input
         autofocus
         @input="changeValue"
         v-if="showInput"
         :value="plugInfo.subInput?.value"
         :placeholder="plugInfo.subInput?.placeholder"
+        class="glass-soft box-border h-9 w-[360px] rounded-glass-sm px-2.5 text-sm leading-9 text-glass-text outline-none [-webkit-app-region:no-drag] placeholder:text-glass-muted"
       />
       <span v-else>{{ plugInfo.pluginName }}</span>
     </div>
-    <div class="handle-container">
-      <div class="handle">
-        <div class="devtool" @click="openDevTool" title="开发者工具"></div>
+    <div class="handle-container flex items-center">
+      <div class="handle flex [-webkit-app-region:no-drag]">
+        <div
+          class="devtool mr-1.5 h-9 w-9 cursor-pointer rounded-full bg-[url(./tool.svg)] bg-center bg-no-repeat hover:bg-glass-strong"
+          @click="openDevTool"
+          title="开发者工具"
+        ></div>
       </div>
-      <div class="window-handle" v-if="process.platform !== 'darwin'">
-        <div class="minimize" @click="minimize"></div>
-        <div class="maximize" @click="maximize"></div>
-        <div class="close" @click="close"></div>
+      <div
+        class="window-handle flex items-center [-webkit-app-region:no-drag]"
+        v-if="process.platform !== 'darwin'"
+      >
+        <div
+          class="minimize h-14 w-12 cursor-pointer bg-[url(./minimize.svg)] bg-[length:20px] bg-center bg-no-repeat hover:bg-glass-strong"
+          @click="minimize"
+        ></div>
+        <div
+          class="maximize h-14 w-12 cursor-pointer bg-[url(./maximize.svg)] bg-[length:20px] bg-center bg-no-repeat hover:bg-glass-strong [&.unmaximize]:bg-[url(./unmaximize.svg)]"
+          @click="maximize"
+        ></div>
+        <div
+          class="close h-14 w-12 cursor-pointer bg-[url(./close.svg)] bg-[length:20px] bg-center bg-no-repeat hover:bg-[#e53935] hover:bg-[url(./close-hover.svg)]"
+          @click="close"
+        ></div>
       </div>
     </div>
   </div>
@@ -128,135 +150,3 @@ if (process.platform === 'darwin') {
   };
 }
 </script>
-
-<style>
-html, body {
-  margin: 0;
-  padding: 0;
-  font-family: system-ui, "PingFang SC", "Helvetica Neue", "Microsoft Yahei", sans-serif;
-  user-select: none;
-  overflow: hidden;
-}
-
-.detach {
-  width: 100%;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  color: var(--color-text-primary);
-}
-
-.detach {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  font-size: 18px;
-  padding-left: 10px;
-  font-weight: 500;
-  box-sizing: border-box;
-  justify-content: space-between;
-}
-
-.detach.darwin {
-  padding-left: 80px;
-  -webkit-app-region: drag;
-}
-
-.detach.win32 {
-  -webkit-app-region: drag;
-}
-
-.detach img {
-  width: 36px;
-  height: 36px;
-  margin-right: 10px;
-}
-
-.detach input {
-  background-color: var(--color-body-bg);
-  color: var(--color-text-primary);
-  width: 360px;
-  height: 36px;
-  line-height: 36px;
-  border-radius: 4px;
-  font-size: 14px;
-  border: none;
-  padding: 0 10px;
-  outline: none;
-  -webkit-app-region: no-drag;
-}
-
-.detach input::-webkit-input-placeholder {
-  color: #aaa;
-  user-select: none;
-}
-
-.detach .info {
-  display: flex;
-  align-items: center;
-}
-
-.handle {
-  display: flex;
-  -webkit-app-region: no-drag;
-}
-
-.handle > div {
-  width: 36px;
-  height: 36px;
-  border-radius: 18px;
-  cursor: pointer;
-  margin-right: 6px;
-}
-
-.handle > div:hover {
-  background-color: #dee2e6;
-}
-
-.handle .devtool {
-  background: center no-repeat url("./assets/tool.svg")
-}
-
-.handle-container {
-  display: flex;
-  align-items: center;
-}
-
-.window-handle {
-  display: flex;
-  align-items: center;
-  -webkit-app-region: no-drag;
-}
-
-.window-handle > div {
-  width: 48px;
-  height: 56px;
-  cursor: pointer;
-}
-
-.window-handle > div:hover {
-  background-color: #dee2e6;
-}
-
-.window-handle .minimize {
-  background: center / 20px no-repeat url("./assets/minimize.svg");
-}
-
-.window-handle .maximize {
-  background: center / 20px no-repeat url("./assets/maximize.svg");
-}
-
-.window-handle .unmaximize {
-  background: center / 20px no-repeat url("./assets/unmaximize.svg");
-}
-
-.window-handle .close {
-  background: center / 20px no-repeat url("./assets/close.svg");
-}
-
-.window-handle .close:hover {
-  background-color: #e53935 !important;
-  background-image: url("./assets/close-hover.svg") !important;
-}
-
-</style>

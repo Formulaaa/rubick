@@ -1,9 +1,13 @@
 <template>
-  <div class="system">
+  <div class="page">
+    <header class="page-header">
+      <div class="min-w-0">
+        <h1 class="page-title">{{ $t('feature.market.developTool') }}</h1>
+      </div>
+    </header>
     <PluginList
       v-if="dev && !!dev.length"
       @downloadSuccess="downloadSuccess"
-      :title="$t('feature.market.developTool')"
       :list="dev"
     />
   </div>
@@ -38,11 +42,3 @@ const dev = computed(() => {
   });
 });
 </script>
-
-<style lang="less">
-.system {
-  width: 100%;
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-</style>

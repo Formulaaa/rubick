@@ -56,29 +56,34 @@ class App {
   }
   onReady() {
     const readyFunction = async () => {
-      checkVersion();
-      await localConfig.init();
-      await winPosition.load();
-      const config = await localConfig.getConfig();
-      if (!config.perf.common.guide) {
-        guide().init();
-        config.perf.common.guide = true;
-        localConfig.setConfig(config);
+      try {
+        checkVersion();
+        await localConfig.init();
+        await winPosition.load();
+        const config = await localConfig.getConfig();
+        if (!config.perf.common.guide) {
+          guide().init();
+          config.perf.common.guide = true;
+          localConfig.setConfig(config);
+        }
+        await this.createWindow();
+        const mainWindow = this.windowCreator.getWindow();
+        API.init(mainWindow);
+        if (!app.getLoginItemSettings().wasOpenedAtLogin) {
+          mainWindow.show();
+          mainWindow.focus();
+        }
+        createTray(this.windowCreator.getWindow());
+        registerHotKey(this.windowCreator.getWindow());
+        this.systemPlugins.triggerReadyHooks(
+          Object.assign(electron, {
+            mainWindow: this.windowCreator.getWindow(),
+            API,
+          }),
+        );
+      } catch (error) {
+        console.error('[rubick] startup failed', error);
       }
-      await this.createWindow();
-      const mainWindow = this.windowCreator.getWindow();
-      API.init(mainWindow);
-      if (!app.getLoginItemSettings().wasOpenedAtLogin) {
-        mainWindow.show();
-      }
-      createTray(this.windowCreator.getWindow());
-      registerHotKey(this.windowCreator.getWindow());
-      this.systemPlugins.triggerReadyHooks(
-        Object.assign(electron, {
-          mainWindow: this.windowCreator.getWindow(),
-          API,
-        }),
-      );
     };
     if (!app.isReady()) {
       app.on('ready', readyFunction);

@@ -60,17 +60,49 @@ export default () => {
   let view;
   const viewInstance = viewPoolManager();
 
-  const viewReadyFn = async (window, { pluginSetting, ext }) => {
+  const viewReadyFn = async (window, { pluginSetting, ext, name }) => {
     if (!view) return;
     const height = pluginSetting && pluginSetting.height;
-    window.setSize(WINDOW_WIDTH, height || WINDOW_PLUGIN_HEIGHT);
-    view.setBounds({
-      x: 0,
-      y: WINDOW_HEIGHT,
-      width: WINDOW_WIDTH,
-      height: height || WINDOW_PLUGIN_HEIGHT - WINDOW_HEIGHT,
-    });
-    view.setAutoResize({ width: true, height: true });
+    const targetHeight = height || WINDOW_PLUGIN_HEIGHT;
+    const isFeature = name === 'rubick-system-feature';
+    const viewX = isFeature ? 8 : 0;
+    const viewY = isFeature ? WINDOW_HEIGHT + 8 : WINDOW_HEIGHT;
+    const viewWidth = isFeature ? WINDOW_WIDTH - 16 : WINDOW_WIDTH;
+    const bottomInset = isFeature ? 8 : 0;
+    const setViewBounds = (windowHeight) => {
+      view.setBounds({
+        x: viewX,
+        y: viewY,
+        width: viewWidth,
+        height: Math.max(0, windowHeight - viewY - bottomInset),
+      });
+    };
+    view.setBackgroundColor?.('#00000000');
+    const windowBounds = window.getBounds();
+    if (windowBounds.height === targetHeight) {
+      setViewBounds(targetHeight);
+      view.setAutoResize({ width: true, height: true });
+    } else {
+      const startHeight = windowBounds.height;
+      const startedAt = Date.now();
+      const duration = 180;
+      const animate = () => {
+        const progress = Math.min(1, (Date.now() - startedAt) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const height = Math.round(
+          startHeight + (targetHeight - startHeight) * eased,
+        );
+        window.setSize(windowBounds.width, height);
+        setViewBounds(height);
+        if (progress < 1) {
+          setTimeout(animate, 16);
+        } else {
+          setViewBounds(targetHeight);
+          view.setAutoResize({ width: true, height: true });
+        }
+      };
+      animate();
+    }
     executeHooks('PluginEnter', ext);
     executeHooks('PluginReady', ext);
     const config = await localConfig.getConfig();
@@ -80,6 +112,33 @@ export default () => {
         `document.body.classList.add("dark");window.rubick.theme="dark"`,
       );
     window.webContents.executeJavaScript(`window.pluginLoaded()`);
+    if (name === 'rubick-system-feature') {
+      const notifyReady = () => {
+        if (window.isDestroyed()) return;
+        view.webContents
+          .executeJavaScript(
+            `new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))`,
+          )
+          .then(() => {
+            if (!window.isDestroyed()) window.webContents.send('feature-ready');
+          })
+          .catch(() => {
+            if (!window.isDestroyed()) window.webContents.send('feature-ready');
+          });
+      };
+      if (view.webContents.isLoadingMainFrame()) {
+        view.webContents.once('did-finish-load', notifyReady);
+      } else {
+        notifyReady();
+      }
+      setTimeout(() => {
+        if (window.isDestroyed()) return;
+        window.webContents.focus();
+        window.webContents.executeJavaScript(
+          `document.getElementById('search')?.focus({ preventScroll: true })`,
+        );
+      }, 220);
+    }
   };
 
   const init = (plugin, window: BrowserWindow) => {
@@ -174,7 +233,7 @@ export default () => {
     );
   };
 
-  const removeView = (window: BrowserWindow) => {
+  const removeView = (window: BrowserWindow, resetUI = true) => {
     if (!view) return;
     executeHooks('PluginOut', null);
     // 先记住这次要移除的视图，防止后面异步代码里全局引用被换掉
@@ -190,7 +249,9 @@ export default () => {
         if (currentView === snapshotView) {
           window.setBrowserView(null);
           if (view === snapshotView) {
-            window.webContents?.executeJavaScript(`window.initRubick()`);
+            if (resetUI) {
+              window.webContents?.executeJavaScript(`window.initRubick()`);
+            }
             view = undefined;
           }
         }

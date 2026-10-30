@@ -1,4 +1,4 @@
-import { BrowserWindow, nativeTheme, protocol } from 'electron';
+import { BrowserWindow, protocol } from 'electron';
 import path from 'path';
 import {
   WINDOW_HEIGHT,
@@ -20,9 +20,6 @@ export default () => {
   };
 
   const createWindow = async () => {
-    const config = await localConfig.getConfig();
-    const isDark =
-      config?.perf?.common?.darkMode ?? nativeTheme.shouldUseDarkColors;
     win = new BrowserWindow({
       height: WINDOW_HEIGHT,
       minHeight: WINDOW_MIN_HEIGHT,
@@ -33,7 +30,9 @@ export default () => {
       title: '拉比克',
       show: false,
       skipTaskbar: true,
-      backgroundColor: isDark ? '#1c1c28' : '#fff',
+      transparent: true,
+      hasShadow: false,
+      backgroundColor: '#00000000',
       webPreferences: {
         webSecurity: false,
         backgroundThrottling: false,
@@ -48,6 +47,12 @@ export default () => {
     require('@electron/remote/main').enable(win.webContents);
     const { x, y } = winPosition.getPosition();
     win.setPosition(x, y);
+    win.webContents.on('did-fail-load', (_e, code, desc, url) => {
+      console.error('[rubick] renderer failed', code, desc, url);
+    });
+    win.webContents.on('render-process-gone', (_e, details) => {
+      console.error('[rubick] renderer gone', details);
+    });
     if (process.env.ELECTRON_RENDERER_URL) {
       // Load the url of the dev server if in development mode
       win.loadURL(process.env.ELECTRON_RENDERER_URL);

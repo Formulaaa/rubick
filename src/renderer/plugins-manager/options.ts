@@ -136,7 +136,9 @@ const optionsManager = ({
           return option;
         }),
     ];
-    return options;
+    return options
+      .sort((a, b) => (b.zIndex || 0) - (a.zIndex || 0))
+      .slice(0, 20);
   };
 
   watch(searchValue, () => search(searchValue.value));

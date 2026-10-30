@@ -1,5 +1,6 @@
 import { builtinModules, createRequire } from 'node:module';
 import { resolve } from 'node:path';
+import tailwindcss from '@tailwindcss/vite';
 import vue from '@vitejs/plugin-vue';
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import type { Plugin } from 'vite';
@@ -216,7 +217,7 @@ export default defineConfig({
         '~': resolve('src'),
       },
     },
-    plugins: [vue(), electronRendererShim()],
+    plugins: [vue(), electronRendererShim(), tailwindcss()],
     build: {
       sourcemap: true,
       rollupOptions: {

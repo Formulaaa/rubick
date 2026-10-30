@@ -1,5 +1,4 @@
 import { getGlobal } from '@electron/remote';
-import { message } from 'ant-design-vue';
 import { exec } from 'child_process';
 import { ipcRenderer, nativeImage } from 'electron';
 import path from 'path';
@@ -11,6 +10,7 @@ import {
 import commonConst from '@/common/utils/commonConst';
 import appSearch from '@/core/app-search';
 import PluginHandler from '@/core/plugin-handler';
+import { toast } from '../utils/toast';
 import optionsManager from './options';
 import searchManager from './search';
 
@@ -66,10 +66,12 @@ const createPluginManager = (): any => {
 
   const loadPlugin = async (plugin) => {
     setSearchValue('');
-    ipcRenderer.send('msg-trigger', {
-      type: 'setExpendHeight',
-      data: 60,
-    });
+    if (plugin.name !== 'rubick-system-feature') {
+      ipcRenderer.send('msg-trigger', {
+        type: 'setExpendHeight',
+        data: 60,
+      });
+    }
     state.pluginLoading = true;
     state.currentPlugin = plugin;
     // 自带的插件不需要检测更新
@@ -106,7 +108,7 @@ const createPluginManager = (): any => {
       try {
         exec(plugin.action);
       } catch (e) {
-        message.error('启动应用出错，请确保启动应用存在！');
+        toast.error('启动应用出错，请确保启动应用存在！');
       }
     }
     changePluginHistory({
@@ -135,7 +137,7 @@ const createPluginManager = (): any => {
       });
       unpin.unshift(plugin);
     }
-    if (state.pluginHistory.length > 8) {
+    while (pin.length + unpin.length > 16 && unpin.length) {
       unpin.pop();
     }
     state.pluginHistory = [...pin, ...unpin];

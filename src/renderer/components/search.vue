@@ -1,60 +1,76 @@
 <template>
-  <div class="rubick-select">
+  <div class="search-shell relative flex h-[60px] shrink-0 items-center px-2.5">
     <div
-      :class="clipboardFile[0].name ? 'clipboard-tag' : 'clipboard-img'"
-      v-if="!!clipboardFile.length"
+      class="search-well well flex h-11 w-full items-center gap-2.5 rounded-[14px] px-2.5"
     >
-      <img style="margin-right: 8px" :src="getIcon()" />
-      <div class="ellipse">{{ clipboardFile[0].name }}</div>
-      <a-tag color="#aaa" v-if="clipboardFile.length > 1">
-        {{ clipboardFile.length }}
-      </a-tag>
-    </div>
-    <div v-else :class="currentPlugin.cmd ? 'rubick-tag' : ''">
-      <img
-        @click="() => emit('openMenu')"
-        @error="onLogoError"
-        class="rubick-logo"
-        :src="currentPlugin.logo || config.perf.custom.logo"
-      />
-      <div class="select-tag" v-show="currentPlugin.cmd">
-        {{ currentPlugin.cmd }}
+      <div
+        v-if="!!clipboardFile.length"
+        class="flex h-7 max-w-[220px] items-center gap-2 rounded-lg border border-glass-border bg-glass-soft px-2 text-[13px] text-glass-text"
+      >
+        <img class="h-5 w-5 rounded-md" :src="getIcon()" />
+        <span class="truncate">{{ clipboardFile[0].name }}</span>
+        <span
+          v-if="clipboardFile.length > 1"
+          class="rounded-full bg-white/10 px-1.5 text-[10px] text-glass-muted"
+        >
+          {{ clipboardFile.length }}
+        </span>
       </div>
+      <button
+        v-else
+        type="button"
+        title="打开插件市场"
+        aria-label="打开插件市场"
+        class="focus-ring flex shrink-0 items-center gap-2 rounded-lg transition-transform active:scale-95"
+        @click="emit('openMenu')"
+      >
+        <img
+          @error="onLogoError"
+          class="rubick-logo h-7 w-7 rounded-full ring-1 ring-white/20"
+          :src="config.perf.custom.logo || currentPlugin.logo"
+        />
+        <span
+          v-show="currentPlugin.cmd && currentPlugin.name !== 'rubick-system-feature'"
+          class="whitespace-pre text-sm text-glass-text"
+        >
+          {{ currentPlugin.cmd }}
+        </span>
+      </button>
+      <input
+        id="search"
+        ref="mainInput"
+        type="text"
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="搜索应用、插件或命令"
+        class="main-input h-9 min-w-0 flex-1 appearance-none border-0 bg-transparent px-0.5 text-[15px] text-glass-text outline-none ring-0 placeholder:text-glass-muted focus:outline-none focus:ring-0"
+        @input="(e) => changeValue(e)"
+        @keydown.down="(e) => keydownEvent(e, 'down')"
+        @keydown.up="(e) => keydownEvent(e, 'up')"
+        @keydown="(e) => checkNeedInit(e)"
+        :value="searchValue"
+        :placeholder="displayPlaceholder"
+        @keypress.enter="(e) => keydownEvent(e, 'enter')"
+        @keypress.space="(e) => keydownEvent(e, 'space')"
+        @focus="emit('focus')"
+      />
+      <span class="keycap shrink-0">Esc</span>
+      <button
+        type="button"
+        aria-label="更多选项"
+        class="focus-ring grid h-8 w-8 shrink-0 place-items-center rounded-lg text-glass-muted transition-colors hover:bg-glass-soft hover:text-glass-text"
+        @click="showSeparate()"
+      >
+        <MoreOutlined class="text-lg" />
+      </button>
     </div>
-    <a-input
-      id="search"
-      ref="mainInput"
-      class="main-input"
-      @input="(e) => changeValue(e)"
-      @keydown.left="(e) => keydownEvent(e, 'left')"
-      @keydown.right="(e) => keydownEvent(e, 'right')"
-      @keydown.down="(e) => keydownEvent(e, 'down')"
-      @keydown.tab="(e) => keydownEvent(e, 'down')"
-      @keydown.up="(e) => keydownEvent(e, 'up')"
-      @keydown="(e) => checkNeedInit(e)"
-      :value="searchValue"
-      :placeholder="
-        pluginLoading
-          ? '更新检测中...'
-          : placeholder || config.perf.custom.placeholder
-      "
-      @keypress.enter="(e) => keydownEvent(e, 'enter')"
-      @keypress.space="(e) => keydownEvent(e, 'space')"
-      @focus="emit('focus')"
-    >
-      <template #suffix>
-        <div class="suffix-tool">
-          <MoreOutlined @click="showSeparate()" class="icon-more" />
-        </div>
-      </template>
-    </a-input>
   </div>
 </template>
 
 <script setup lang="ts">
 import { MoreOutlined } from '@ant-design/icons-vue';
 import { ipcRenderer } from 'electron';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import fileIcon from '../assets/file.png';
 import defaultLogo from '../assets/logo.png';
 
@@ -91,6 +107,22 @@ const props: any = defineProps({
   currentPlugin: {},
   pluginLoading: Boolean,
   clipboardFile: (() => [])(),
+});
+
+const displayPlaceholder = computed(() => {
+  if (props.pluginLoading) return '更新检测中...';
+  if (props.placeholder) return props.placeholder;
+  const custom = config.value.perf.custom?.placeholder;
+  if (
+    !custom ||
+    custom === '你好，Rubick！请输入插件关键词' ||
+    custom === '你好，Rubick！请输入插件关键词。'
+  ) {
+    return config.value.perf.common.lang === 'en-US'
+      ? 'Search apps, plugins, files or commands'
+      : '搜索应用、插件、文件或命令';
+  }
+  return custom;
 });
 
 const changeValue = (e) => {
@@ -134,12 +166,6 @@ const keydownEvent = (e, key: string) => {
       emit('changeCurrent', -1);
       break;
     case 'down':
-      emit('changeCurrent', 1);
-      break;
-    case 'left':
-      emit('changeCurrent', -1);
-      break;
-    case 'right':
       emit('changeCurrent', 1);
       break;
     case 'enter':
@@ -284,140 +310,3 @@ window.rubick.hooks.onHide = () => {
   emit('clearSearchValue');
 };
 </script>
-
-<style lang="less">
-.rubick-select {
-  display: flex;
-  padding-left: 16px;
-  background: var(--color-body-bg);
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  align-items: center;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  .ellipse {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 200px;
-  }
-  .rubick-tag {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 8px;
-    height: 40px;
-    border-radius: 9px;
-    background: var(--color-list-hover);
-  }
-  .select-tag {
-    white-space: pre;
-    user-select: none;
-    font-size: 16px;
-    color: var(--color-text-primary);
-    margin-left: 8px;
-  }
-
-  .main-input {
-    height: 40px !important;
-    box-sizing: border-box;
-    flex: 1;
-    border: none;
-    outline: none;
-    box-shadow: none !important;
-    background: var(--color-body-bg);
-    padding-left: 8px;
-    .ant-select-selection,
-    .ant-input,
-    .ant-select-selection__rendered {
-      caret-color: var(--ant-primary-color);
-      height: 100% !important;
-      font-size: 16px;
-      border: none !important;
-      background: var(--color-body-bg);
-      color: var(--color-text-primary);
-    }
-  }
-
-  .rubick-logo {
-    width: 32px;
-    border-radius: 100%;
-  }
-  .icon-tool {
-    width: 40px;
-    height: 40px;
-    background: #574778;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 100%;
-    img {
-      width: 32px;
-    }
-  }
-  .icon-tool {
-    background: var(--color-input-hover);
-  }
-  .ant-input:focus {
-    border: none;
-    box-shadow: none;
-  }
-  .suffix-tool {
-    display: flex;
-    align-items: center;
-    .icon-more {
-      font-size: 26px;
-      font-weight: bold;
-      cursor: pointer;
-      color: var(--color-text-content);
-    }
-    .loading {
-      color: var(--ant-primary-color);
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    .update-tips {
-      position: absolute;
-      right: 46px;
-      top: 50%;
-      font-size: 14px;
-      transform: translateY(-50%);
-      color: #aaa;
-    }
-  }
-  .clipboard-tag {
-    white-space: pre;
-    user-select: none;
-    font-size: 16px;
-    height: 32px;
-    position: relative;
-    align-items: center;
-    display: flex;
-    border: 1px solid var(--color-border-light);
-    padding: 0 8px;
-    margin-right: 12px;
-    img {
-      width: 24px;
-      height: 24px;
-      margin-right: 6px;
-    }
-  }
-  .clipboard-img {
-    white-space: pre;
-    user-select: none;
-    font-size: 16px;
-    height: 32px;
-    position: relative;
-    align-items: center;
-    display: flex;
-    img {
-      width: 32px;
-      height: 32px;
-    }
-  }
-}
-</style>

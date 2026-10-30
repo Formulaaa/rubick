@@ -1,55 +1,55 @@
 <template>
-  <a-alert
-    :message="$t('feature.settings.intranet.tips')"
-    type="warning"
-    style="margin-bottom: 20px"
-  />
-  <a-form
-    name="custom-validation"
-    ref="formRef"
-    :model="formState"
-    :rules="rules"
-    v-bind="layout"
-  >
-    <a-form-item
-      has-feedback
-      :label="$t('feature.settings.intranet.npmMirror')"
-      name="register"
-    >
-      <a-input
-        placeholder="https://registry.npmmirror.com"
-        v-model:value="formState.register"
-      />
-    </a-form-item>
-    <a-form-item
-      has-feedback
-      :label="$t('feature.settings.intranet.dbUrl')"
-      name="database"
-    >
-      <a-input
-        placeholder="https://gitee.com/monkeyWang/rubickdatabase/raw/master"
-        v-model:value="formState.database"
-      />
-    </a-form-item>
-    <a-form-item
-      has-feedback
-      :label="$t('feature.settings.intranet.accessToken')"
-      name="access_token"
-    >
-      <a-input
-        :placeholder="$t('feature.settings.intranet.placeholder')"
-        v-model:value="formState.access_token"
-      />
-    </a-form-item>
-    <a-form-item :wrapper-col="{ span: 18, offset: 6 }">
-      <a-button @click="submit" type="primary">确定</a-button>
-      <a-button style="margin-left: 10px" @click="resetForm">恢复默认</a-button>
-    </a-form-item>
-  </a-form>
+  <div class="space-y-4">
+    <GAlert
+      :message="$t('feature.settings.intranet.tips')"
+      type="warning"
+    />
+
+    <div class="surface-section">
+      <div class="field-row">
+        <label class="w-32 shrink-0 text-[13px] text-glass-text">
+          {{ $t('feature.settings.intranet.npmMirror') }}
+        </label>
+        <GInput
+          class="!w-[320px] shrink-0"
+          placeholder="https://registry.npmmirror.com"
+          v-model="formState.register"
+        />
+      </div>
+      <div class="field-row">
+        <label class="w-32 shrink-0 text-[13px] text-glass-text">
+          {{ $t('feature.settings.intranet.dbUrl') }}
+        </label>
+        <GInput
+          class="!w-[320px] shrink-0"
+          placeholder="https://gitee.com/monkeyWang/rubickdatabase/raw/master"
+          v-model="formState.database"
+        />
+      </div>
+      <div class="field-row">
+        <label class="w-32 shrink-0 text-[13px] text-glass-text">
+          {{ $t('feature.settings.intranet.accessToken') }}
+        </label>
+        <GInput
+          class="!w-[320px] shrink-0"
+          :placeholder="$t('feature.settings.intranet.placeholder')"
+          v-model="formState.access_token"
+        />
+      </div>
+      <div class="flex justify-end gap-2 border-t border-line px-4 py-3">
+        <GButton variant="primary" size="sm" @click="submit">
+          确定
+        </GButton>
+        <GButton variant="secondary" size="sm" @click="resetForm">
+          恢复默认
+        </GButton>
+      </div>
+    </div>
+  </div>
 </template>
 <script lang="ts" setup>
-import { message } from 'ant-design-vue';
 import { ref, toRaw } from 'vue';
+import { GAlert, GButton, GInput, toast } from '@/components/ui';
 
 let _rev: any;
 
@@ -68,15 +68,6 @@ try {
 }
 
 const formState = ref(JSON.parse(JSON.stringify(defaultConfig)));
-
-const rules = {
-  register: [{ required: true, trigger: 'change' }],
-  database: [{ required: true, trigger: 'change' }],
-};
-const layout = {
-  labelCol: { span: 6 },
-  wrapperCol: { span: 18 },
-};
 
 const resetForm = () => {
   formState.value = {
@@ -97,20 +88,6 @@ const submit = () => {
   }
 
   window.rubick.db.put(changeData);
-  message.success('设置成功！重启插件市场后生效！');
+  toast.success('设置成功！重启插件市场后生效！');
 };
 </script>
-
-<style lang="less" scoped>
-.ant-form {
-  :deep(.ant-form-item) {
-    label {
-      color: var(--color-text-content);
-    }
-  }
-}
-:deep(.ant-input) {
-  background: var(--color-input-hover);
-  color: var(--color-text-content);
-}
-</style>

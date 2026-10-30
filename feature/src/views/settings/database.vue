@@ -1,146 +1,163 @@
 <template>
-  <div class="export-header">
-    <a-button @click="exportData" size="small" type="primary" style="margin-right: 10px;">
-      导出数据
-      <template #icon>
-        <ExportOutlined />
-      </template>
-    </a-button>
-    <a-button @click="importData" danger size="small" style="margin-right: 10px; background-color: var(--color-input-hover)">
-      导入数据
-      <template #icon>
-        <ImportOutlined />
-      </template>
-    </a-button>
-    <a-button type="link" size="small" @click="showSetting = true">
-      <template #icon>
-        <SettingOutlined />
-      </template>
-    </a-button>
-  </div>
-  <a-list item-layout="horizontal" :data-source="dataPlugins">
-    <template #renderItem="{ item }">
-      <a-list-item>
-        <template #actions>
-          <a v-if="!item.plugin?.isdownload && !item.plugin?.isloading" key="list-loadmore-edit"
-             @click="() => downloadPlugin(item.plugin)">
-            <CloudDownloadOutlined style="font-size: 18px;"/>
-          </a>
-          <a v-if="item.plugin?.isloading" key="list-loadmore-edit">
-            <LoadingOutlined style="font-size: 18px;"/>
-          </a>
-          <a key="list-loadmore-edit" @click="() => showKeys(item)">
-            <DatabaseOutlined style="font-size: 18px;"/>
-          </a>
-        </template>
-        <a-list-item-meta>
-          <template #title>
-            <div style="color: var(--color-text-content)">
-              <span>{{ item.plugin?.pluginName }}</span>
-            </div>
-          </template>
-          <template #avatar>
-            <a-avatar shape="square" :src="item.plugin?.logo"/>
-          </template>
-          <template #description>
-            <div style="color: var(--color-text-desc)">
-              <span>{{ item.keys.length }} 份文档</span>
-            </div>
-          </template>
-        </a-list-item-meta>
-      </a-list-item>
-    </template>
-  </a-list>
-  <a-drawer
-    v-model:visible="open"
-    width="400"
-    :closable="false"
-    :title="currentSelect.plugin.pluginName"
-    placement="right"
-    class="exportDrawer"
-  >
-    <p
-      class="key-item"
-      :key="key"
-      @click="() => showDetail(key)"
-      v-for="key in currentSelect.keys"
-    >
-      {{ key }}
-    </p>
-  </a-drawer>
-  <a-modal
-    centered
-    :bodyStyle="{
-      maxHeight: '500px',
-      overflow: 'auto',
-      backgroundColor: 'var(--color-body-bg)',
-      color: 'var(--color-text-primary)'
-    }"
-    :footer="null"
-    :closable="false"
-    v-model:visible="show"
-  >
-    <pre>{{ JSON.stringify(detail, null, 2) }}</pre>
-  </a-modal>
-  <a-modal
-    v-model:visible="showSetting"
-    title="webdav 账户配置"
-    :footer="null"
-    class="webdavModel"
-  >
-    <a-alert v-if="formState.suport === 'jianguo'" style="margin-bottom: 20px;" type="info" show-icon>
-      <template #message>
-        <div
-          @click="openHelp"
-          class="openHelp">
-          点击查看如何获取坚果云账号密码
+  <div class="space-y-4">
+    <div class="section-head">
+      <span class="section-title">
+        {{ $t('feature.settings.database.title') }}
+      </span>
+      <div class="flex shrink-0 items-center gap-2">
+        <GButton variant="primary" size="sm" @click="exportData">
+          <ExportOutlined />
+          导出数据
+        </GButton>
+        <GButton variant="danger" size="sm" @click="importData">
+          <ImportOutlined />
+          导入数据
+        </GButton>
+        <GButton
+          variant="ghost"
+          size="sm"
+          title="webdav 账户配置"
+          aria-label="webdav 账户配置"
+          @click="showSetting = true"
+        >
+          <SettingOutlined />
+        </GButton>
+      </div>
+    </div>
+
+    <div class="row-list">
+      <div
+        v-for="item in dataPlugins"
+        :key="item.name"
+        class="row-item"
+      >
+        <GAvatar :src="item.plugin?.logo" :size="36" />
+        <div class="min-w-0 flex-1">
+          <div class="truncate text-[13px] text-glass-text">
+            {{ item.plugin?.pluginName }}
+          </div>
+          <div class="text-[11px] text-glass-muted">
+            {{ item.keys.length }} 份文档
+          </div>
         </div>
-      </template>
-    </a-alert>
-    <a-form
-      :model="formState"
-      name="basic"
-      :label-col="{ span: 8 }"
-      :wrapper-col="{ span: 16 }"
-      autocomplete="off"
-      @finish="handleOk"
+        <div class="flex shrink-0 items-center gap-1">
+          <button
+            v-if="!item.plugin?.isdownload && !item.plugin?.isloading"
+            type="button"
+            class="focus-ring grid h-8 w-8 place-items-center rounded-full text-accent transition-colors hover:bg-accent/10"
+            title="下载"
+            aria-label="下载"
+            @click="downloadPlugin(item.plugin)"
+          >
+            <CloudDownloadOutlined class="text-[16px]" />
+          </button>
+          <span
+            v-if="item.plugin?.isloading"
+            class="grid h-8 w-8 place-items-center text-glass-muted"
+          >
+            <LoadingOutlined class="text-[16px]" />
+          </span>
+          <button
+            type="button"
+            class="focus-ring grid h-8 w-8 place-items-center rounded-full text-accent transition-colors hover:bg-accent/10"
+            title="查看文档"
+            aria-label="查看文档"
+            @click="showKeys(item)"
+          >
+            <DatabaseOutlined class="text-[16px]" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <GDrawer
+      v-model="open"
+      :width="400"
+      :title="currentSelect.plugin.pluginName"
     >
-      <a-form-item
-        label="webdav 提供商"
-        name="suport"
+      <button
+        v-for="key in currentSelect.keys"
+        :key="key"
+        type="button"
+        class="focus-ring block w-full truncate rounded-lg px-2 py-1.5 text-left text-[13px] text-glass-text transition-colors hover:bg-glass-soft hover:text-accent"
+        @click="showDetail(key)"
       >
-        <a-select v-model:value="formState.suport">
-          <a-select-option value="jianguo">坚果云</a-select-option>
-          <a-select-option value="auto">自定义</a-select-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item
-        label="服务器地址"
-        name="url"
-        v-show="formState.suport === 'auto'"
-        :rules="[{ required: true, message: '请填写服务器地址!' }]"
+        {{ key }}
+      </button>
+    </GDrawer>
+
+    <GModal v-model="show" :width="640">
+      <pre class="overflow-auto text-glass-text [&]:bg-transparent">{{
+        JSON.stringify(detail, null, 2)
+      }}</pre>
+    </GModal>
+
+    <GModal v-model="showSetting" title="webdav 账户配置" :width="520">
+      <GAlert
+        v-if="formState.suport === 'jianguo'"
+        class="mb-5"
+        type="info"
       >
-        <a-input v-model:value="formState.url" />
-      </a-form-item>
-      <a-form-item
-        label="账户"
-        name="username"
-        :rules="[{ required: true, message: '请填写 username!' }]"
-      >
-        <a-input v-model:value="formState.username" />
-      </a-form-item>
-      <a-form-item
-        label="密码"
-        name="password"
-        :rules="[{ required: true, message: '请填写 password!' }]"
-      >
-        <a-input-password v-model:value="formState.password" />
-      </a-form-item>
-      <a-form-item :wrapper-col="{ offset: 8, span: 16 }">
-        <a-button type="primary" html-type="submit">保存设置</a-button>
-      </a-form-item>
-    </a-form>
-  </a-modal>
+        <template #message>
+          <button
+            type="button"
+            class="focus-ring rounded text-left underline underline-offset-2"
+            @click="openHelp"
+          >
+            点击查看如何获取坚果云账号密码
+          </button>
+        </template>
+      </GAlert>
+      <form class="space-y-4" autocomplete="off" @submit.prevent="handleOk">
+        <div class="flex items-center gap-4">
+          <label class="w-28 shrink-0 text-[13px] text-glass-text">
+            webdav 提供商
+          </label>
+          <GSelect
+            v-model="formState.suport"
+            class="flex-1"
+            :options="webdavOptions"
+          />
+        </div>
+        <div
+          v-show="formState.suport === 'auto'"
+          class="flex items-center gap-4"
+        >
+          <label class="w-28 shrink-0 text-[13px] text-glass-text">
+            服务器地址
+          </label>
+          <GInput v-model="formState.url" class="flex-1" />
+        </div>
+        <div class="flex items-center gap-4">
+          <label class="w-28 shrink-0 text-[13px] text-glass-text">账户</label>
+          <GInput v-model="formState.username" class="flex-1" />
+        </div>
+        <div class="flex items-center gap-4">
+          <label class="w-28 shrink-0 text-[13px] text-glass-text">密码</label>
+          <GInput
+            v-model="formState.password"
+            type="password"
+            class="flex-1"
+          />
+        </div>
+        <div class="flex justify-end">
+          <GButton variant="primary" @click="handleOk">保存设置</GButton>
+        </div>
+      </form>
+    </GModal>
+
+    <GModal v-model="confirmVisible" title="导入确认">
+      <p class="text-[13px] text-glass-muted">
+        导入坚果云数据将会覆盖本地数据，是否确认导入？
+      </p>
+      <template #footer>
+        <GButton variant="secondary" @click="confirmVisible = false">
+          取消
+        </GButton>
+        <GButton variant="danger" @click="confirmImport">确认导入</GButton>
+      </template>
+    </GModal>
+  </div>
 </template>
 <script setup>
 import {
@@ -151,10 +168,19 @@ import {
   LoadingOutlined,
   SettingOutlined,
 } from '@ant-design/icons-vue';
-import { Modal, message } from 'ant-design-vue';
 import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
+import {
+  GAlert,
+  GAvatar,
+  GButton,
+  GDrawer,
+  GInput,
+  GModal,
+  GSelect,
+  toast,
+} from '@/components/ui';
 import logoImage from '../../assets/logo.png';
 
 const { t } = useI18n();
@@ -162,8 +188,14 @@ const { t } = useI18n();
 const open = ref(false);
 const show = ref(false);
 const showSetting = ref(false);
+const confirmVisible = ref(false);
 const currentSelect = ref({ plugin: {} });
 const detail = ref({});
+
+const webdavOptions = [
+  { label: '坚果云', value: 'jianguo' },
+  { label: '自定义', value: 'auto' },
+];
 
 const defaultConfig = window.rubick.dbStorage.getItem(
   'rubick-db-jg-webdav',
@@ -189,7 +221,7 @@ const handleOk = () => {
     'rubick-db-jg-webdav',
     JSON.parse(JSON.stringify(formState)),
   );
-  message.success('保存成功');
+  toast.success('保存成功');
   showSetting.value = false;
 };
 
@@ -209,13 +241,12 @@ const importData = () => {
   if (!formState.password || !formState.username) {
     return (showSetting.value = true);
   }
-  Modal.confirm({
-    title: '导入确认',
-    content: '导入坚果云数据将会覆盖本地数据，是否确认导入？',
-    onOk() {
-      window.market.dbImport(JSON.parse(JSON.stringify(formState)));
-    },
-  });
+  confirmVisible.value = true;
+};
+
+const confirmImport = () => {
+  window.market.dbImport(JSON.parse(JSON.stringify(formState)));
+  confirmVisible.value = false;
 };
 
 const openHelp = () => {
@@ -256,66 +287,7 @@ const successDownload = (name) => store.dispatch('successDownload', name);
 const downloadPlugin = async (plugin) => {
   startDownload(plugin.name);
   await window.market.downloadPlugin(plugin);
-  message.success(t('feature.dev.installSuccess', { pluginName: plugin.name }));
+  toast.success(t('feature.dev.installSuccess', { pluginName: plugin.name }));
   successDownload(plugin.name);
 };
 </script>
-<style lang="less">
-.openHelp {
-  cursor: pointer;
-  text-decoration: underline;
-}
-.export-header {
-  width: 100%;
-  height: 40px;
-  border-bottom: 1px solid var(--color-border-light);
-  text-align: right;
-}
-.key-item {
-  cursor: pointer;
-
-  &:hover {
-    color: var(--ant-primary-color);
-  }
-}
-.exportDrawer{
-  .ant-drawer-header{
-    background-color: var(--color-body-bg);
-    border-bottom: 1px solid var(--color-border-light);
-    .ant-drawer-title{
-      color: var(--color-text-primary);
-    }
-  }
-  .ant-drawer-body{
-    background-color: var(--color-body-bg);
-    color: var(--color-text-content)
-  }
-}
-.webdavModel{
-  .ant-modal-close-x{
-    color: var(--color-text-content);
-  }
-  .ant-modal-header{
-    background-color: var(--color-body-bg);
-    border-bottom: 1px solid var(--color-border-light);
-    .ant-modal-title{
-      color: var(--color-text-primary);
-    }
-  }
-  .ant-form-item-label>label {
-    color: var(--color-text-content);
-  }
-  .ant-modal-body {
-    background-color: var(--color-body-bg);
-    .ant-input,
-    .ant-input-password,
-    .ant-select-selector {
-      background: var(--color-input-hover) !important;
-      color: var(--color-text-content);
-    }
-    .ant-input-password-icon, .ant-select-arrow {
-      color: var(--color-action-color);
-     }
-  }
-}
-</style>

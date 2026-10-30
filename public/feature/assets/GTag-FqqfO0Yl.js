@@ -1,0 +1,1 @@
+import{A as e,D as t,h as n}from"./runtime-dom.esm-bundler-CGvgp6_H.js";var r=(e,t)=>{let n=e.__vccOpts||e;for(let[e,r]of t)n[e]=r;return n},i={},a={class:`inline-flex items-center rounded-full bg-glass-soft px-2 py-0.5 text-xs text-glass-muted ring-1 ring-white/10`};function o(r,i){return t(),n(`span`,a,[e(r.$slots,`default`)])}var s=r(i,[[`render`,o]]);export{r as n,s as t};

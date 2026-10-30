@@ -1,106 +1,84 @@
 <template>
-  <div class="main-container">
-    <div class="left-menu">
-      <a-menu
-        @select="({ key }) => changeMenu(key)"
-        :selectedKeys="active"
-        mode="vertical"
-      >
-        <a-menu-item key="finder">
-          <template #icon>
-            <StarOutlined style="font-size: 16px" />
-          </template>
-          {{ $t('feature.market.explore') }}
-        </a-menu-item>
-        <a-menu-item key="worker">
-          <template #icon>
-            <SendOutlined style="transform: rotate(-45deg); font-size: 16px" />
-          </template>
-          {{ $t('feature.market.efficiency') }}
-        </a-menu-item>
-        <a-menu-item key="tools">
-          <template #icon>
-            <SearchOutlined style="font-size: 16px" />
-          </template>
-          {{ $t('feature.market.searchTool') }}
-        </a-menu-item>
-        <a-menu-item key="image">
-          <template #icon>
-            <FileImageOutlined style="font-size: 16px" />
-          </template>
-          {{ $t('feature.market.imageTool') }}
-        </a-menu-item>
-        <a-menu-item key="devPlugin">
-          <template #icon>
-            <CodeOutlined style="font-size: 16px" />
-          </template>
-          {{ $t('feature.market.developTool') }}
-        </a-menu-item>
-        <a-menu-item key="system">
-          <template #icon>
-            <DatabaseOutlined style="font-size: 16px" />
-          </template>
-          {{ $t('feature.market.systemTool') }}
-        </a-menu-item>
-        <a-menu-item key="localPlugin">
-          <template #icon>
-            <ApiOutlined style="font-size: 16px" />
-          </template>
-          {{ $t('feature.market.localPlugin') }}
-        </a-menu-item>
-        <a-sub-menu class="user-info">
-          <template #icon>
-            <a-avatar :size="32">
-              <template #icon>
-                <img :src="perf.custom.logo" />
-              </template>
-            </a-avatar>
-          </template>
-          <template #title>{{ perf.custom.username }}</template>
-          <a-menu-item key="settings">
-            <template #icon>
-              <SettingOutlined />
-            </template>
-            {{ $t('feature.settings.title') }}
-          </a-menu-item>
-          <a-menu-item key="installed">
-            <template #icon>
-              <HeartOutlined />
-            </template>
-            {{ $t('feature.installed.title') }}
-          </a-menu-item>
-          <a-menu-item key="dev">
-            <template #icon>
-              <BugOutlined />
-            </template>
-            {{ $t('feature.dev.title') }}
-          </a-menu-item>
-        </a-sub-menu>
-      </a-menu>
-    </div>
-    <div
-      :class="
-        [
-          'finder',
-          'result',
-          'devPlugin',
-          'image',
-          'tools',
-          'worker',
-          'system',
-          'localPlugin',
-        ].includes(active[0])
-          ? 'container'
-          : 'more'
-      "
+  <div
+    class="feature-shell main-container flex h-screen w-full overflow-hidden text-glass-text"
+  >
+    <aside
+      class="flex h-full w-[188px] shrink-0 flex-col border-r border-line bg-black/[0.025] px-3 py-4 dark:bg-white/[0.035]"
     >
-      <keep-alive>
+      <nav class="flex min-h-0 flex-1 flex-col gap-0.5 overflow-auto">
+        <button
+          v-for="item in menuItems"
+          :key="item.key"
+          type="button"
+          class="focus-ring relative flex h-9 items-center gap-3 rounded-[10px] px-3 text-left text-[13px] transition-colors duration-150"
+          :class="
+            active[0] === item.key
+              ? 'bg-accent/10 text-accent'
+              : 'text-glass-muted hover:bg-glass-soft hover:text-glass-text'
+          "
+          @click="changeMenu(item.key)"
+        >
+          <span
+            v-if="active[0] === item.key"
+            class="absolute left-0 h-4 w-[2px] rounded-full bg-accent"
+          />
+          <component :is="item.icon" class="h-4 w-4 shrink-0" />
+          <span class="truncate">{{ $t(item.label) }}</span>
+        </button>
+      </nav>
+
+      <div class="relative mt-3 border-t border-line pt-3">
+        <button
+          type="button"
+          class="focus-ring flex w-full items-center gap-2 rounded-[10px] p-2 text-left transition-colors hover:bg-glass-soft"
+          @click="userMenuOpen = !userMenuOpen"
+        >
+          <img
+            :src="perf.custom.logo"
+            class="h-7 w-7 shrink-0 rounded-full object-cover ring-1 ring-white/15"
+          />
+          <span class="min-w-0 flex-1 truncate text-[12px] text-glass-text">
+            {{ perf.custom.username }}
+          </span>
+          <svg
+            class="h-3.5 w-3.5 text-glass-muted transition-transform"
+            :class="userMenuOpen ? 'rotate-90' : ''"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="m9 18 6-6-6-6" />
+          </svg>
+        </button>
+
+        <div
+          v-if="userMenuOpen"
+          class="glass-panel absolute bottom-[calc(100%+8px)] left-0 right-0 rounded-[16px] p-1.5"
+        >
+          <button
+            v-for="item in userMenuItems"
+            :key="item.key"
+            type="button"
+            class="focus-ring flex w-full items-center gap-2 rounded-[9px] px-3 py-2 text-left text-[12px] text-glass-muted transition-colors hover:bg-glass-soft hover:text-glass-text"
+            @click="changeMenu(item.key); userMenuOpen = false"
+          >
+            <component :is="item.icon" class="h-4 w-4" />
+            <span>{{ $t(item.label) }}</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="relative h-full min-w-0 flex-1 overflow-auto">
+      <div
+        class="glass-scroll mx-auto flex min-h-full w-full max-w-[1060px] flex-col px-6 py-5"
+      >
         <router-view />
-      </keep-alive>
-    </div>
+      </div>
+    </main>
   </div>
 </template>
-
 <script setup lang="ts">
 import {
   ApiOutlined,
@@ -114,7 +92,7 @@ import {
   SettingOutlined,
   StarOutlined,
 } from '@ant-design/icons-vue';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import localConfig from '@/confOp';
@@ -123,6 +101,27 @@ const store = useStore();
 const router = useRouter();
 const active = computed(() => store.state.active);
 const { perf } = localConfig.getConfig();
+const userMenuOpen = ref(false);
+
+const menuItems = [
+  { key: 'finder', label: 'feature.market.explore', icon: StarOutlined },
+  { key: 'worker', label: 'feature.market.efficiency', icon: SendOutlined },
+  { key: 'tools', label: 'feature.market.searchTool', icon: SearchOutlined },
+  { key: 'image', label: 'feature.market.imageTool', icon: FileImageOutlined },
+  { key: 'devPlugin', label: 'feature.market.developTool', icon: CodeOutlined },
+  { key: 'system', label: 'feature.market.systemTool', icon: DatabaseOutlined },
+  {
+    key: 'localPlugin',
+    label: 'feature.market.localPlugin',
+    icon: ApiOutlined,
+  },
+];
+
+const userMenuItems = [
+  { key: 'settings', label: 'feature.settings.title', icon: SettingOutlined },
+  { key: 'installed', label: 'feature.installed.title', icon: HeartOutlined },
+  { key: 'dev', label: 'feature.dev.title', icon: BugOutlined },
+];
 
 const changeMenu = (key: any) => {
   store.commit('commonUpdate', { active: [key] });
@@ -160,105 +159,3 @@ window.rubick.setSubInput((e: any) => {
 const init = () => store.dispatch('init');
 init();
 </script>
-<style lang="less">
-.ant-menu-submenu-popup {
-  .ant-menu {
-    background: var(--color-body-bg2) !important;
-    height: 100%;
-    border-right: none;
-    .ant-menu-item,
-    .ant-menu-submenu,
-    .ant-menu-submenu-arrow {
-      color: var(--color-text-content);
-      &:active {
-        background: none;
-      }
-    }
-    .ant-menu-item-selected,
-    .ant-menu-submenu-selected {
-      background-color: var(--color-list-hover);
-      color: var(--ant-primary-color);
-      .ant-menu-submenu-arrow {
-        color: var(--ant-primary-color);
-      }
-      &:after {
-        display: none;
-      }
-    }
-  }
-}
-</style>
-<style lang="less" scoped>
-@import '@/assets/common.less';
-* {
-  margin: 0;
-  padding: 0;
-}
-.main-container {
-  -webkit-app-region: no-drag;
-  display: flex;
-  background: var(--color-body-bg);
-  border-top: 1px solid var(--color-border-light);
-  height: 100vh;
-  box-sizing: border-box;
-  align-items: flex-start;
-  width: 100%;
-  overflow: hidden;
-  background: var(--color-menu-bg);
-  .search {
-    :deep(.ant-btn),
-    :deep(.ant-input),
-    :deep(.ant-input-group-addon) {
-      color: var(--ant-primary-color) !important;
-      background: var(--color-input-hover);
-      border-color: var(--color-border-light);
-    }
-  }
-  .container,
-  .more {
-    background: var(--color-body-bg);
-    width: calc(~'100% - 183px');
-    height: 100%;
-    box-sizing: border-box;
-    padding: 16px;
-    position: relative;
-    overflow: auto;
-  }
-  .more {
-    background: var(--color-body-bg2);
-  }
-  .left-menu {
-    padding: 16px;
-    position: relative;
-    height: 100vh;
-    :deep(.ant-menu) {
-      width: 100%;
-    }
-    :deep(.ant-menu-item) {
-      padding-left: 12px !important;
-      display: flex;
-      align-items: center;
-    }
-    :deep(.ant-menu-item-selected),
-    :deep(.ant-menu-submenu-selected) {
-      background-color: var(--color-list-hover);
-      border-radius: 6px;
-      color: var(--ant-primary-color);
-    }
-    :deep(.user-info) {
-      position: absolute;
-      bottom: 16px;
-      width: calc(100% - 32px);
-      .ant-menu-submenu-title {
-        padding: 0 32px 0 8px;
-        .ant-menu-title-content {
-          margin-left: 8px;
-        }
-      }
-    }
-    :deep(.ant-avatar) {
-      background: transparent;
-    }
-  }
-}
-</style>

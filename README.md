@@ -35,7 +35,7 @@ Download the latest release:
 After installing rubick, you can quickly launch the main program by pressing the shortcut keys Alt/Option+R. Entering keywords in the main program input box can search for corresponding apps, plugins, files...
 Select the ones you want and use them.
 
-If you don't want the function, you can click the logo on the left to enter the plugin market and find the ones you want to install.
+If you don't want the function, you can click the user avatar/logo on the left of the search box (hover shows “Open plugin market”) to enter the plugin market and find the ones you want to install.
 
 ## Feature list
 - [x] Plugin management based on the npm package pattern, installing plugins is as simple as installing npm packages.

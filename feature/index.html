@@ -6,12 +6,270 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="/favicon.ico">
     <title>feature</title>
+    <style>
+      html,
+      body,
+      #app {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        background: transparent;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+      }
+
+      .boot-shell {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        border-right: 1px solid rgba(22, 25, 40, 0.1);
+        border-bottom: 1px solid rgba(22, 25, 40, 0.1);
+        border-left: 1px solid rgba(22, 25, 40, 0.1);
+        border-radius: 0 0 24px 24px;
+        background: #fbfcff;
+      }
+
+      .boot-sidebar {
+        display: flex;
+        width: 188px;
+        flex: 0 0 188px;
+        flex-direction: column;
+        gap: 12px;
+        border-right: 1px solid rgba(22, 25, 40, 0.08);
+        padding: 16px;
+        box-sizing: border-box;
+      }
+
+      .boot-brand,
+      .boot-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .boot-avatar,
+      .boot-block,
+      .boot-icon {
+        background: rgba(21, 23, 34, 0.1);
+        animation: boot-pulse 1.4s ease-in-out infinite;
+      }
+
+      .boot-avatar {
+        width: 36px;
+        height: 36px;
+        flex: none;
+        border-radius: 10px;
+      }
+
+      .boot-block {
+        height: 12px;
+        border-radius: 999px;
+      }
+
+      .boot-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 16px;
+      }
+
+      .boot-nav .boot-block {
+        width: 86%;
+        height: 32px;
+        border-radius: 10px;
+      }
+
+      .boot-main {
+        min-width: 0;
+        flex: 1;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+
+      .boot-title {
+        width: 128px;
+        height: 20px;
+      }
+
+      .boot-label {
+        width: 40px;
+        height: 12px;
+        margin-top: 28px;
+      }
+
+      .boot-list {
+        margin-top: 18px;
+        border: 1px solid rgba(22, 25, 40, 0.08);
+        border-radius: 18px;
+        overflow: hidden;
+      }
+
+      .boot-row {
+        min-height: 64px;
+        padding: 8px 12px;
+        border-bottom: 1px solid rgba(22, 25, 40, 0.08);
+        box-sizing: border-box;
+      }
+
+      .boot-row:last-child {
+        border-bottom: 0;
+      }
+
+      .boot-icon {
+        width: 36px;
+        height: 36px;
+        flex: none;
+        border-radius: 10px;
+      }
+
+      .boot-lines {
+        display: flex;
+        min-width: 0;
+        flex: 1;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .boot-lines .boot-block:first-child {
+        width: 112px;
+      }
+
+      .boot-lines .boot-block:last-child {
+        width: 208px;
+        height: 10px;
+      }
+
+      @keyframes boot-pulse {
+        0%,
+        100% {
+          opacity: 0.42;
+        }
+
+        50% {
+          opacity: 0.9;
+        }
+      }
+
+      body.dark .boot-shell {
+        border-color: rgba(255, 255, 255, 0.11);
+        background: #11141f;
+      }
+
+      body.dark .boot-sidebar {
+        border-right-color: rgba(255, 255, 255, 0.08);
+      }
+
+      body.dark .boot-avatar,
+      body.dark .boot-block,
+      body.dark .boot-icon {
+        background: rgba(244, 245, 251, 0.11);
+      }
+
+      body.dark .boot-list,
+      body.dark .boot-row {
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        .boot-shell {
+          border-color: rgba(255, 255, 255, 0.11);
+          background: #11141f;
+        }
+
+        .boot-sidebar {
+          border-right-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .boot-avatar,
+        .boot-block,
+        .boot-icon {
+          background: rgba(244, 245, 251, 0.11);
+        }
+
+        .boot-list,
+        .boot-row {
+          border-color: rgba(255, 255, 255, 0.08);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .boot-avatar,
+        .boot-block,
+        .boot-icon {
+          animation: none;
+          opacity: 0.55;
+        }
+      }
+    </style>
   </head>
   <body>
     <noscript>
       <strong>We're sorry but feature doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
     </noscript>
-    <div id="app"></div>
+    <div id="app">
+      <div class="boot-shell" aria-hidden="true">
+        <aside class="boot-sidebar">
+          <div class="boot-brand">
+            <span class="boot-avatar"></span>
+            <span class="boot-block" style="width: 84px"></span>
+          </div>
+          <div class="boot-nav">
+            <span class="boot-block"></span>
+            <span class="boot-block"></span>
+            <span class="boot-block"></span>
+            <span class="boot-block"></span>
+            <span class="boot-block"></span>
+            <span class="boot-block"></span>
+            <span class="boot-block"></span>
+          </div>
+        </aside>
+        <main class="boot-main">
+          <div class="boot-block boot-title"></div>
+          <div class="boot-block boot-label"></div>
+          <div class="boot-list">
+            <div class="boot-row">
+              <span class="boot-icon"></span>
+              <span class="boot-lines">
+                <span class="boot-block"></span>
+                <span class="boot-block"></span>
+              </span>
+            </div>
+            <div class="boot-row">
+              <span class="boot-icon"></span>
+              <span class="boot-lines">
+                <span class="boot-block"></span>
+                <span class="boot-block"></span>
+              </span>
+            </div>
+            <div class="boot-row">
+              <span class="boot-icon"></span>
+              <span class="boot-lines">
+                <span class="boot-block"></span>
+                <span class="boot-block"></span>
+              </span>
+            </div>
+            <div class="boot-row">
+              <span class="boot-icon"></span>
+              <span class="boot-lines">
+                <span class="boot-block"></span>
+                <span class="boot-block"></span>
+              </span>
+            </div>
+            <div class="boot-row">
+              <span class="boot-icon"></span>
+              <span class="boot-lines">
+                <span class="boot-block"></span>
+                <span class="boot-block"></span>
+              </span>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

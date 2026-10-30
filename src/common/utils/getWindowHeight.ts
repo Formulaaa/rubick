@@ -1,14 +1,16 @@
 const WINDOW_MAX_HEIGHT = 620;
 const WINDOW_MIN_HEIGHT = 60;
 const PRE_ITEM_HEIGHT = 70;
-const HISTORY_HEIGHT = 70;
+const HOME_HEIGHT = 250;
+const HOME_EMPTY_HEIGHT = 320;
+const FOOTER_HEIGHT = 34;
 
 export default (searchList: Array<any>, historyList): number => {
-  const defaultHeight = historyList.length ? HISTORY_HEIGHT : 0;
-  if (!searchList) return WINDOW_MAX_HEIGHT + defaultHeight;
-  if (!searchList.length) return WINDOW_MIN_HEIGHT + defaultHeight;
-  return searchList.length * PRE_ITEM_HEIGHT + WINDOW_MIN_HEIGHT >
-    WINDOW_MAX_HEIGHT
-    ? WINDOW_MAX_HEIGHT
-    : searchList.length * PRE_ITEM_HEIGHT + WINDOW_MIN_HEIGHT;
+  if (!searchList) return WINDOW_MAX_HEIGHT;
+  if (!searchList.length) {
+    return historyList?.length ? HOME_HEIGHT : HOME_EMPTY_HEIGHT;
+  }
+  const target =
+    searchList.length * PRE_ITEM_HEIGHT + WINDOW_MIN_HEIGHT + FOOTER_HEIGHT;
+  return Math.min(target, WINDOW_MAX_HEIGHT);
 };

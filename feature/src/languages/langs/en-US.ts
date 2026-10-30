@@ -3,6 +3,8 @@ export default {
     feature: {
       market: {
         title: 'Market',
+        description:
+          'Add one-step tools to your workflow and launch them from search.',
         search: 'Search Plugins',
         searchResult: 'Search Results',
         explore: 'Explore',
@@ -18,6 +20,23 @@ export default {
           lastUpdated: 'Total',
         },
         install: 'Install',
+        installFailed: 'Installation failed. Please try again.',
+        installNetworkError:
+          'Network request failed. Check your connection and try again.',
+        installed: 'Installed',
+        available: 'Available',
+        updated: 'Updated',
+        author: 'Author',
+        version: 'Version',
+        source: 'Source',
+        keywords: 'Trigger keywords',
+        keywordHint: 'Type one to open this plugin',
+        trustNote:
+          'Plugins run with local permissions. Only install from trusted sources.',
+        loading: 'Loading plugins…',
+        loadFailed: 'Failed to load plugins',
+        noData: 'No plugins to show right now',
+        retry: 'Retry',
       },
       installed: {
         title: 'Installed',
@@ -40,10 +59,10 @@ export default {
           tips2:
             'After the software preferences are set, please restart the software. Please go to the mini program set avatar and nickname.',
           themeColor: 'Theme Setting',
-          spring: 'Spring',
-          summer: 'Summer',
-          autumn: 'Autumn',
-          winter: 'Winter',
+          spring: 'Mist',
+          summer: 'Aurora',
+          autumn: 'Dusk',
+          winter: 'Nebula',
           personalized: 'Personalized',
           greeting: 'Search Box Greeting',
           logo: 'Avatar',
