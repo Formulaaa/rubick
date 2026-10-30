@@ -49,13 +49,11 @@
 </template>
 
 <script lang="ts" setup>
-import { defineEmits, defineProps, reactive, ref, toRaw, watch } from 'vue';
+import { reactive, ref, toRaw, watch } from 'vue';
 import localConfig from '../confOp';
 
 const path = window.require('path');
 const remote = window.require('@electron/remote');
-
-declare const __static: string;
 
 const config: any = ref(localConfig.getConfig());
 
@@ -85,10 +83,10 @@ const renderTitle = (title, match) => {
   const result = title.substring(match[0], match[1] + 1);
   return `<div>${title.substring(
     0,
-    match[0]
+    match[0],
   )}<span style='color: var(--ant-error-color)'>${result}</span>${title.substring(
     match[1] + 1,
-    title.length
+    title.length,
   )}</div>`;
 };
 
@@ -96,7 +94,7 @@ const renderDesc = (desc = '') => {
   if (desc.length > 80) {
     return `${desc.substr(0, 63)}...${desc.substr(
       desc.length - 14,
-      desc.length
+      desc.length,
     )}`;
   }
   return desc;
@@ -141,16 +139,18 @@ const initMainCmdMenus = () => {
     {
       id: 'removeRecentCmd',
       label: '从"使用记录"中删除',
-      icon: path.join(__static, 'icons', 'delete@2x.png'),
+      icon: path.join(window.__static, 'icons', 'delete@2x.png'),
       click: () => {
-        const history = props.pluginHistory.filter((item) => item.name !== menuState.plugin.name);
+        const history = props.pluginHistory.filter(
+          (item) => item.name !== menuState.plugin.name,
+        );
         emit('setPluginHistory', toRaw(history));
       },
     },
     {
       id: 'pinToMain',
       label: '固定到"搜索面板"',
-      icon: path.join(__static, 'icons', 'pin@2x.png'),
+      icon: path.join(window.__static, 'icons', 'pin@2x.png'),
       click: () => {
         const history = props.pluginHistory.map((item) => {
           if (item.name === menuState.plugin.name) {
@@ -164,7 +164,7 @@ const initMainCmdMenus = () => {
     {
       id: 'unpinFromMain',
       label: '从"搜索面板"取消固定',
-      icon: path.join(__static, 'icons', 'unpin@2x.png'),
+      icon: path.join(window.__static, 'icons', 'unpin@2x.png'),
       click: () => {
         const history = props.pluginHistory.map((item) => {
           if (item.name === menuState.plugin.name) {

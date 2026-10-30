@@ -1,8 +1,8 @@
-import { Notification, app } from 'electron';
+import { app, Notification } from 'electron';
 import MemoryStream from 'memorystream';
 
 import { createClient } from 'webdav';
-import { WebDAVClient } from 'webdav/dist/node/types';
+import type { WebDAVClient } from 'webdav/dist/node/types';
 
 type WebDavOptions = {
   username: string;
@@ -66,7 +66,7 @@ export default class WebDav {
           title: '已导出到坚果云',
           body: `文件目录为：${this.cloudPath}`,
         }).show();
-      })
+      }),
     );
   }
 

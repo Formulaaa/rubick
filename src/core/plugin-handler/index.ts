@@ -1,15 +1,14 @@
-import {
+import axios from 'axios';
+import spawn from 'cross-spawn';
+import { ipcRenderer } from 'electron';
+import fixPath from 'fix-path';
+import fs from 'fs-extra';
+import got from 'got';
+import path from 'path';
+import type {
   AdapterHandlerOptions,
   AdapterInfo,
 } from '@/core/plugin-handler/types';
-import fs from 'fs-extra';
-import path from 'path';
-import got from 'got';
-import fixPath from 'fix-path';
-
-import spawn from 'cross-spawn';
-import { ipcRenderer } from 'electron';
-import axios from 'axios';
 
 fixPath();
 
@@ -43,7 +42,7 @@ class AdapterHandler {
           volta: {
             node: '16.19.1',
           },
-        })
+        }),
       );
     }
     this.baseDir = options.baseDir;
@@ -65,7 +64,7 @@ class AdapterHandler {
   async upgrade(name: string): Promise<void> {
     // 创建一个npm-registry-client实例
     const packageJSON = JSON.parse(
-      fs.readFileSync(`${this.baseDir}/package.json`, 'utf-8')
+      fs.readFileSync(`${this.baseDir}/package.json`, 'utf-8'),
     );
     const registryUrl = `https://registry.npmmirror.com/${name}`;
 
@@ -93,7 +92,7 @@ class AdapterHandler {
    */
   async getAdapterInfo(
     adapter: string,
-    adapterPath: string
+    adapterPath: string,
   ): Promise<AdapterInfo> {
     let adapterInfo: AdapterInfo;
     const infoPath =
@@ -102,12 +101,12 @@ class AdapterHandler {
     // 从本地获取
     if (await fs.pathExists(infoPath)) {
       adapterInfo = JSON.parse(
-        fs.readFileSync(infoPath, 'utf-8')
+        fs.readFileSync(infoPath, 'utf-8'),
       ) as AdapterInfo;
     } else {
       // 本地没有从远程获取
       const resp = await got.get(
-        `https://cdn.jsdelivr.net/npm/${adapter}/plugin.json`
+        `https://cdn.jsdelivr.net/npm/${adapter}/plugin.json`,
       );
       // Todo 校验合法性
       adapterInfo = JSON.parse(resp.body) as AdapterInfo;
@@ -149,7 +148,7 @@ class AdapterHandler {
    */
   async list() {
     const installInfo = JSON.parse(
-      await fs.readFile(`${this.baseDir}/package.json`, 'utf-8')
+      await fs.readFile(`${this.baseDir}/package.json`, 'utf-8'),
     );
     const adapters: string[] = [];
     for (const adapter in installInfo.dependencies) {
@@ -167,7 +166,7 @@ class AdapterHandler {
       let args: string[] = [cmd].concat(
         cmd !== 'uninstall' && cmd !== 'link'
           ? modules.map((m) => `${m}@latest`)
-          : modules
+          : modules,
       );
       if (cmd !== 'link') {
         args = args
@@ -184,13 +183,13 @@ class AdapterHandler {
 
       let output = '';
       npm.stdout
-        .on('data', (data: string) => {
+        ?.on('data', (data: string) => {
           output += data; // 获取输出日志
         })
         .pipe(process.stdout);
 
       npm.stderr
-        .on('data', (data: string) => {
+        ?.on('data', (data: string) => {
           output += data; // 获取报错日志
         })
         .pipe(process.stderr);

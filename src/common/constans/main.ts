@@ -84,4 +84,4 @@ const DECODE_KEY = {
   Quote: "'",
 };
 
-export { PLUGIN_INSTALL_DIR, DECODE_KEY };
+export { DECODE_KEY, PLUGIN_INSTALL_DIR };

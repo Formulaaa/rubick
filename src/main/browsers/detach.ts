@@ -1,9 +1,11 @@
+import { pathToFileURL } from 'node:url';
 import { BrowserWindow, ipcMain, nativeTheme, screen } from 'electron';
-import localConfig from '../common/initLocalConfig';
-import commonConst from '@/common/utils/commonConst';
 import path from 'path';
 import { WINDOW_MIN_HEIGHT } from '@/common/constans/common';
+import commonConst from '@/common/utils/commonConst';
 import mainInstance from '@/main';
+import localConfig from '../common/initLocalConfig';
+import staticPath from '../common/staticPath';
 export default () => {
   let win: any;
 
@@ -44,11 +46,13 @@ export default () => {
         spellcheck: false,
       },
     });
-    if (process.env.WEBPACK_DEV_SERVER_URL) {
+    if (commonConst.dev()) {
       // Load the url of the dev server if in development mode
       createWin.loadURL('http://localhost:8082');
     } else {
-      createWin.loadURL(`file://${path.join(__static, './detach/index.html')}`);
+      createWin.loadURL(
+        pathToFileURL(path.join(staticPath, './detach/index.html')).href,
+      );
     }
     createWin.on('close', () => {
       executeHooks('PluginOut', null);
@@ -67,13 +71,13 @@ export default () => {
       const darkMode = config.perf.common.darkMode;
       darkMode &&
         createWin.webContents.executeJavaScript(
-          `document.body.classList.add("dark");window.rubick.theme="dark"`
+          `document.body.classList.add("dark");window.rubick.theme="dark"`,
         );
       view.setAutoResize({ width: true, height: true });
       createWin.setBrowserView(view);
       view.inDetach = true;
       createWin.webContents.executeJavaScript(
-        `window.initDetach(${JSON.stringify(pluginInfo)})`
+        `window.initDetach(${JSON.stringify(pluginInfo)})`,
       );
       createWin.show();
     });
@@ -124,12 +128,12 @@ export default () => {
     if (commonConst.macOS()) {
       createWin.on('enter-full-screen', () => {
         createWin.webContents.executeJavaScript(
-          'window.enterFullScreenTrigger()'
+          'window.enterFullScreenTrigger()',
         );
       });
       createWin.on('leave-full-screen', () => {
         createWin.webContents.executeJavaScript(
-          'window.leaveFullScreenTrigger()'
+          'window.leaveFullScreenTrigger()',
         );
       });
     }

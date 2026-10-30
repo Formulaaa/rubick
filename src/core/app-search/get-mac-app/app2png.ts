@@ -1,9 +1,10 @@
-import path from 'path';
-import fs from 'fs';
 import { exec } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const plist = require('simple-plist');
+import runtimeRequire from '@/common/utils/runtimeRequire';
+
+const plist = runtimeRequire('simple-plist');
 
 const getIconFile = (appFileInput) => {
   return new Promise((resolve, reject) => {
@@ -11,14 +12,14 @@ const getIconFile = (appFileInput) => {
     plist.readFile(plistPath, (err, data) => {
       if (err || !data.CFBundleIconFile) {
         return resolve(
-          '/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericApplicationIcon.icns'
+          '/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericApplicationIcon.icns',
         );
       }
       const iconFile = path.join(
         appFileInput,
         'Contents',
         'Resources',
-        data.CFBundleIconFile
+        data.CFBundleIconFile,
       );
       const iconFiles = [iconFile, iconFile + '.icns', iconFile + '.tiff'];
       const existedIcon = iconFiles.find((iconFile) => {
@@ -26,7 +27,7 @@ const getIconFile = (appFileInput) => {
       });
       resolve(
         existedIcon ||
-          '/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericApplicationIcon.icns'
+          '/System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/GenericApplicationIcon.icns',
       );
     });
   });
@@ -38,7 +39,7 @@ const tiffToPng = (iconFile, pngFileOutput) => {
       `sips -s format png '${iconFile}' --out '${pngFileOutput}' --resampleHeightWidth 64 64`,
       (error) => {
         error ? reject(error) : resolve(null);
-      }
+      },
     );
   });
 };

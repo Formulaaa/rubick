@@ -1,0 +1,17 @@
+packages:
+  - feature
+  - tpl
+  - detach
+  - guide
+
+minimumReleaseAge: 1440
+
+allowBuilds:
+  electron: true
+  esbuild: true
+  uiohook-napi: true
+  leveldown: true
+  electron-clipboard-ex: true
+  extract-file-icon: true
+  electron-winstaller: true
+  core-js: false

@@ -5,6 +5,9 @@ const path = require('path');
 
 const appPath = app.getPath('userData');
 
+// 静态资源目录（开发环境为项目 public，生产环境为 resources/static）
+window.__static = path.join(app.getAppPath(), 'public');
+
 const baseDir = path.join(appPath, './rubick-plugins-new');
 
 const ipcSendSync = (type, data) => {
@@ -95,6 +98,10 @@ window.rubick = {
   copyFile: (file) => {
     return ipcSendSync('copyFile', { file });
   },
+  clipboardGetFormats: () => ipcSendSync('clipboardGetFormats'),
+  clipboardReadText: () => ipcSendSync('clipboardReadText'),
+  clipboardReadImage: () => ipcSendSync('clipboardReadImage'),
+  clipboardClear: () => ipcSendSync('clipboardClear'),
   db: {
     put: (data) => ipcSendSync('dbPut', { data }),
     get: (id) => ipcSendSync('dbGet', { id }),

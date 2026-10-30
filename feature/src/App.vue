@@ -102,20 +102,20 @@
 </template>
 
 <script setup lang="ts">
+import {
+  ApiOutlined,
+  BugOutlined,
+  CodeOutlined,
+  DatabaseOutlined,
+  FileImageOutlined,
+  HeartOutlined,
+  SearchOutlined,
+  SendOutlined,
+  SettingOutlined,
+  StarOutlined,
+} from '@ant-design/icons-vue';
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  StarOutlined,
-  SendOutlined,
-  SearchOutlined,
-  FileImageOutlined,
-  DatabaseOutlined,
-  CodeOutlined,
-  SettingOutlined,
-  HeartOutlined,
-  BugOutlined,
-  ApiOutlined,
-} from '@ant-design/icons-vue';
 import { useStore } from 'vuex';
 import localConfig from '@/confOp';
 
@@ -189,7 +189,7 @@ init();
 }
 </style>
 <style lang="less" scoped>
-@import '~@/assets/common.less';
+@import '@/assets/common.less';
 * {
   margin: 0;
   padding: 0;

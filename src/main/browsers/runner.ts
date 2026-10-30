@@ -1,31 +1,32 @@
-import { BrowserView, BrowserWindow, session } from 'electron';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { BrowserView, type BrowserWindow, session } from 'electron';
 import path from 'path';
-import commonConst from '../../common/utils/commonConst';
-import { PLUGIN_INSTALL_DIR as baseDir } from '@/common/constans/main';
-import localConfig from '@/main/common/initLocalConfig';
 import {
   WINDOW_HEIGHT,
   WINDOW_PLUGIN_HEIGHT,
   WINDOW_WIDTH,
 } from '@/common/constans/common';
+import { PLUGIN_INSTALL_DIR as baseDir } from '@/common/constans/main';
+import localConfig from '@/main/common/initLocalConfig';
+import commonConst from '../../common/utils/commonConst';
+import staticPath from '../common/staticPath';
 
 const getRelativePath = (indexPath) => {
-  return commonConst.windows()
-    ? indexPath.replace('file://', '')
-    : indexPath.replace('file:', '');
+  if (typeof indexPath === 'string' && indexPath.startsWith('file:')) {
+    try {
+      return fileURLToPath(indexPath);
+    } catch {
+      return indexPath;
+    }
+  }
+  return indexPath;
 };
 
 const getPreloadPath = (plugin, pluginIndexPath) => {
   const { name, preload, tplPath, indexPath } = plugin;
   if (!preload) return;
-  if (commonConst.dev()) {
-    if (name === 'rubick-system-feature') {
-      return path.resolve(__static, `../feature/public/preload.js`);
-    }
-    if (tplPath) {
-      return path.resolve(getRelativePath(indexPath), `./`, preload);
-    }
-    return path.resolve(getRelativePath(pluginIndexPath), `../`, preload);
+  if (name === 'rubick-system-feature') {
+    return path.join(__dirname, '../preload/feature-preload.js');
   }
   if (tplPath) {
     return path.resolve(getRelativePath(indexPath), `./`, preload);
@@ -76,7 +77,7 @@ export default () => {
     const darkMode = config.perf.common.darkMode;
     darkMode &&
       view.webContents.executeJavaScript(
-        `document.body.classList.add("dark");window.rubick.theme="dark"`
+        `document.body.classList.add("dark");window.rubick.theme="dark"`,
       );
     window.webContents.executeJavaScript(`window.pluginLoaded()`);
   };
@@ -115,22 +116,22 @@ export default () => {
     if (commonConst.dev() && development) {
       pluginIndexPath = development;
       const pluginPath = path.resolve(baseDir, 'node_modules', name);
-      preloadPath = `file://${path.join(pluginPath, './', main)}`;
+      preloadPath = pathToFileURL(path.join(pluginPath, './', main)).href;
     }
     // 再尝试去找
     if (plugin.name === 'rubick-system-feature' && !pluginIndexPath) {
       pluginIndexPath = commonConst.dev()
         ? 'http://localhost:8081/#/'
-        : `file://${__static}/feature/index.html`;
+        : pathToFileURL(path.join(staticPath, 'feature/index.html')).href;
     }
     if (!pluginIndexPath) {
       const pluginPath = path.resolve(baseDir, 'node_modules', name);
-      pluginIndexPath = `file://${path.join(pluginPath, './', main)}`;
+      pluginIndexPath = pathToFileURL(path.join(pluginPath, './', main)).href;
     }
     const preload = getPreloadPath(plugin, preloadPath || pluginIndexPath);
 
     const ses = session.fromPartition('<' + name + '>');
-    ses.setPreloads([`${__static}/preload.js`]);
+    ses.setPreloads([path.join(__dirname, '../preload/preload.js')]);
 
     view = new BrowserView({
       webPreferences: {
@@ -158,7 +159,7 @@ export default () => {
         callback({
           requestHeaders: { referer: '*', ...details.requestHeaders },
         });
-      }
+      },
     );
 
     view.webContents.session.webRequest.onHeadersReceived(
@@ -169,7 +170,7 @@ export default () => {
             ...details.responseHeaders,
           },
         });
-      }
+      },
     );
   };
 

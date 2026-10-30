@@ -1,5 +1,9 @@
-import { clipboard } from 'electron';
 import path from 'path';
+import {
+  rawFormat,
+  readRawBuffer,
+  writeClipboardItems,
+} from '@/common/utils/clipboard';
 
 // 仅在 Windows 平台辅助操作剪贴板多文件格式。
 type ClipboardExModule = typeof import('electron-clipboard-ex');
@@ -82,12 +86,15 @@ const buildDropEffectBuffer = (effect: 'copy' | 'move' | 'link' = 'copy') => {
  * 3. 写入 Preferred DropEffect（告诉系统“这是复制”）
  * 全部成功后，读取一次 CF_HDROP 的长度，确认剪贴板里确实有内容。
  */
-const writeWindowsBuffers = (files: string[]): boolean => {
+const writeWindowsBuffers = async (files: string[]): Promise<boolean> => {
   try {
-    clipboard.writeBuffer('CF_HDROP', buildWindowsFileDropBuffer(files));
-    clipboard.writeBuffer('FileNameW', buildWindowsFileListPayload(files));
-    clipboard.writeBuffer('Preferred DropEffect', buildDropEffectBuffer('copy'));
-    return clipboard.readBuffer('CF_HDROP').length > 0;
+    await writeClipboardItems({
+      [rawFormat('CF_HDROP')]: buildWindowsFileDropBuffer(files),
+      [rawFormat('FileNameW')]: buildWindowsFileListPayload(files),
+      [rawFormat('Preferred DropEffect')]: buildDropEffectBuffer('copy'),
+    });
+    const payload = await readRawBuffer('CF_HDROP');
+    return !!payload && payload.length > 0;
   } catch {
     return false;
   }
@@ -120,7 +127,9 @@ const writeWithClipboardEx = (files: string[]): boolean => {
  * 3. 若第三方库不可用或失败，再退回 Electron 原生写入流程。
  * 这一层屏蔽了所有细节，外部调用者只需传入字符串数组即可。
  */
-export const copyFilesToWindowsClipboard = (files: string[]): boolean => {
+export const copyFilesToWindowsClipboard = async (
+  files: string[],
+): Promise<boolean> => {
   const normalizedFiles = files
     .map((filePath) => path.normalize(filePath))
     .filter(Boolean);
@@ -130,4 +139,3 @@ export const copyFilesToWindowsClipboard = (files: string[]): boolean => {
   }
   return writeWindowsBuffers(normalizedFiles);
 };
-

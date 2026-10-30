@@ -107,21 +107,21 @@
 </template>
 
 <script setup>
-import { useStore } from 'vuex';
-import { computed, ref, toRaw, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import path from 'path';
 import {
-  PushpinOutlined,
-  PushpinFilled,
   CaretRightOutlined,
   DownOutlined,
+  PushpinFilled,
+  PushpinOutlined,
 } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
+import { computed, ref, toRaw, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useStore } from 'vuex';
 
 import emptyJson from '@/assets/lottie/empty.json';
 
 const { ipcRenderer } = window.require('electron');
+const path = window.require('path');
 
 const remote = window.require('@electron/remote');
 const fs = window.require('fs');
@@ -135,8 +135,8 @@ const router = useRouter();
 
 const localPlugins = computed(() =>
   store.state.localPlugins.filter(
-    (plugin) => plugin.name !== 'rubick-system-feature'
-  )
+    (plugin) => plugin.name !== 'rubick-system-feature',
+  ),
 );
 const updateLocalPlugin = () => store.dispatch('updateLocalPlugin');
 const startUnDownload = (name) => store.dispatch('startUnDownload', name);
@@ -158,19 +158,19 @@ const superPanelPlugins = ref(
   window.rubick.db.get('super-panel-user-plugins') || {
     data: [],
     _id: 'super-panel-user-plugins',
-  }
+  },
 );
 
 const handleMenuClick = (key, item, cmd) => {
-  if(key === 'open') {
+  if (key === 'open') {
     openPlugin({
       code: item.code,
       cmd,
     });
   } else if (key === 'add') {
-    addCmdToSuperPanel({cmd, code: item.code});
+    addCmdToSuperPanel({ cmd, code: item.code });
   } else {
-    removePluginToSuperPanel({cmd, name: item.name})
+    removePluginToSuperPanel({ cmd, name: item.name });
   }
 };
 
@@ -185,7 +185,9 @@ const addCmdToSuperPanel = ({ cmd, code }) => {
     },
   };
   superPanelPlugins.value.data.push(plugin);
-  const { rev } = window.rubick.db.put(JSON.parse(JSON.stringify(superPanelPlugins.value)));
+  const { rev } = window.rubick.db.put(
+    JSON.parse(JSON.stringify(superPanelPlugins.value)),
+  );
   superPanelPlugins.value._rev = rev;
 };
 
@@ -194,7 +196,7 @@ const removePluginToSuperPanel = ({ cmd, name }) => {
     (item) => {
       if (name) return item.name !== name;
       return item.cmd !== cmd;
-    }
+    },
   );
   const { rev } = window.rubick.db.put(toRaw(superPanelPlugins.value));
   superPanelPlugins.value._rev = rev;
@@ -223,8 +225,8 @@ const openPlugin = ({ cmd, code }) => {
           type: 'text',
           payload: null,
         },
-      })
-    )
+      }),
+    ),
   );
 };
 

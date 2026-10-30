@@ -1,10 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import getMacApps from './get-mac-app';
 import fs from 'fs';
-import path from 'path';
-
 import os from 'os';
+import path from 'path';
+import getMacApps from './get-mac-app';
 
 const icondir = path.join(os.tmpdir(), 'ProcessIcon');
 
@@ -77,7 +74,7 @@ export default async (nativeImage: any) => {
         path.join(
           os.tmpdir(),
           'ProcessIcon',
-          `${encodeURIComponent(app._name)}.png`
+          `${encodeURIComponent(app._name)}.png`,
         );
     }
     // todo getApp size

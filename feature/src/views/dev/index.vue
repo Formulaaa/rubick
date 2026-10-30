@@ -32,9 +32,10 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
 import { message } from 'ant-design-vue';
+import { reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+
 const { t } = useI18n();
 
 const formRef = ref();
@@ -70,7 +71,7 @@ const refresh = () => {
       name: formState.name,
     });
     message.success(
-      t('feature.dev.refreshSuccess', { pluginName: formState.name })
+      t('feature.dev.refreshSuccess', { pluginName: formState.name }),
     );
   });
 };

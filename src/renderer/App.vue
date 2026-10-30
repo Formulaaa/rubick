@@ -31,17 +31,17 @@
 </template>
 
 <script setup lang="ts">
-import { watch, ref, toRaw } from 'vue';
+import { getGlobal } from '@electron/remote';
+import { message } from 'ant-design-vue';
 import { exec } from 'child_process';
+import { ref, toRaw, watch } from 'vue';
+import { PLUGIN_HISTORY } from '@/common/constans/renderer';
+import useDrag from '../common/utils/dragWindow';
+import getWindowHeight from '../common/utils/getWindowHeight';
 import Result from './components/result.vue';
 import Search from './components/search.vue';
-import getWindowHeight from '../common/utils/getWindowHeight';
-import createPluginManager from './plugins-manager';
-import useDrag from '../common/utils/dragWindow';
-import { getGlobal } from '@electron/remote';
-import { PLUGIN_HISTORY } from '@/common/constans/renderer';
-import { message } from 'ant-design-vue';
 import localConfig from './confOp';
+import createPluginManager from './plugins-manager';
 
 const { onMouseDown } = useDrag();
 const remote = window.require('@electron/remote');
@@ -77,7 +77,7 @@ const config: any = ref(localConfig.getConfig());
 getPluginInfo({
   pluginName: 'feature',
   // eslint-disable-next-line no-undef
-  pluginPath: `${__static}/feature/package.json`,
+  pluginPath: `${window.__static}/feature/package.json`,
 }).then((res) => {
   menuPluginInfo.value = res;
   remote.getGlobal('LOCAL_PLUGINS').addPlugin(res);
@@ -93,13 +93,13 @@ watch(
         options.value,
         pluginLoading.value || !config.value.perf.common.history
           ? []
-          : pluginHistory.value
-      )
+          : pluginHistory.value,
+      ),
     );
   },
   {
     immediate: true,
-  }
+  },
 );
 
 const changeIndex = (index) => {
@@ -150,7 +150,7 @@ const choosePlugin = (plugin) => {
     if (hasRemove) {
       const result = window.rubick.db.get(PLUGIN_HISTORY) || {};
       const history = result.data.filter(
-        (item) => item.originName !== currentChoose.originName
+        (item) => item.originName !== currentChoose.originName,
       );
       setPluginHistory(history);
       return message.warning('插件已被卸载！');
@@ -165,8 +165,8 @@ const choosePlugin = (plugin) => {
             type: currentChoose.cmd.type || 'text',
             payload: null,
           },
-        })
-      )
+        }),
+      ),
     );
   }
 };

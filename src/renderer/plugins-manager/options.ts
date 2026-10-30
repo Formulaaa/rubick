@@ -1,10 +1,10 @@
-import { ref, watch } from 'vue';
-import debounce from 'lodash.debounce';
-import { ipcRenderer } from 'electron';
 import { getGlobal } from '@electron/remote';
+import { ipcRenderer } from 'electron';
+import debounce from 'lodash.debounce';
 import PinyinMatch from 'pinyin-match';
-import pluginClickEvent from './pluginClickEvent';
+import { ref, watch } from 'vue';
 import useFocus from './clipboardWatch';
+import pluginClickEvent from './pluginClickEvent';
 
 function formatReg(regStr) {
   const flags = regStr.replace(/.*\/([gimy]*)$/, '$1');

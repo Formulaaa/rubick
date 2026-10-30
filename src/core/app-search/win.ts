@@ -1,17 +1,18 @@
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
 import { shell } from 'electron';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import runtimeRequire from '@/common/utils/runtimeRequire';
 
 const filePath = path.resolve(
-  'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs'
+  'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs',
 );
 
 const appData = path.join(os.homedir(), './AppData/Roaming');
 
 const startMenu = path.join(
   appData,
-  'Microsoft\\Windows\\Start Menu\\Programs'
+  'Microsoft\\Windows\\Start Menu\\Programs',
 );
 
 const fileLists: any = [];
@@ -26,7 +27,7 @@ if (!exists) {
 const getico = (app) => {
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fileIcon = require('extract-file-icon');
+    const fileIcon = runtimeRequire('extract-file-icon');
     const buffer = fileIcon(app.desc, 32);
     const iconpath = path.join(icondir, `${app.name}.png`);
 
@@ -44,13 +45,13 @@ const getico = (app) => {
 
 function fileDisplay(filePath) {
   //根据文件路径读取文件，返回文件列表
-  fs.readdir(filePath, function (err, files) {
+  fs.readdir(filePath, (err, files) => {
     if (err) {
       console.warn(err);
     } else {
-      files.forEach(function (filename) {
+      files.forEach((filename) => {
         const filedir = path.join(filePath, filename);
-        fs.stat(filedir, function (eror, stats) {
+        fs.stat(filedir, (eror, stats) => {
           if (eror) {
             console.warn('获取文件stats失败');
           } else {
@@ -92,7 +93,7 @@ function fileDisplay(filePath) {
               const icon = path.join(
                 os.tmpdir(),
                 'ProcessIcon',
-                `${encodeURIComponent(appName)}.png`
+                `${encodeURIComponent(appName)}.png`,
               );
 
               const appInfo = {

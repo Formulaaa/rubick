@@ -3,7 +3,7 @@ import plist from 'plist';
 
 export default function getApps(resolve, reject, filterByAppName = false) {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
+  // @ts-expect-error
   let resultBuffer = new Buffer.from([]);
 
   const profileInstalledApps = spawn('/usr/sbin/system_profiler', [
@@ -25,12 +25,12 @@ export default function getApps(resolve, reject, filterByAppName = false) {
 
     try {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       const [installedApps] = plist.parse(resultBuffer.toString());
       if (!filterByAppName) return resolve(installedApps._items);
       return resolve(
         installedApps._items.filter((apps) => apps._name === filterByAppName)
-          .length !== 0
+          .length !== 0,
       );
     } catch (err) {
       reject(err);

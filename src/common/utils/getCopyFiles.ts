@@ -1,37 +1,45 @@
-import commonConst from './commonConst';
-import { clipboard } from 'electron';
-import plist from 'plist';
 import fs from 'fs';
-import path from 'path';
 import ofs from 'original-fs';
+import path from 'path';
+import plist from 'plist';
+import { readClipboardType, readRawFormat } from './clipboard';
+import commonConst from './commonConst';
+import runtimeRequire from './runtimeRequire';
 
-export default function getCopyFiles(): Array<any> | null {
+const parseUriList = (text: string): string[] => {
+  const matches = text.match(/^file:\/\/\/.*/gm) || [];
+  return matches.map((item) =>
+    decodeURIComponent(item).replace(/^file:\/\//, ''),
+  );
+};
+
+export default async function getCopyFiles(): Promise<Array<any> | null> {
   let fileInfo;
   if (commonConst.macOS()) {
-    if (!clipboard.has('NSFilenamesPboardType')) return null;
-    const result = clipboard.read('NSFilenamesPboardType');
-    if (!result) return null;
-    try {
-      fileInfo = plist.parse(result);
-    } catch (e) {
-      return null;
+    const raw = await readRawFormat('NSFilenamesPboardType');
+    if (raw) {
+      try {
+        fileInfo = plist.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    } else {
+      const uriList = await readClipboardType('text/uri-list');
+      if (!uriList) return null;
+      fileInfo = parseUriList(uriList);
     }
   } else if (process.platform === 'win32') {
     try {
-      /* eslint-disable */
-      const clipboardEx = require('electron-clipboard-ex');
+      const clipboardEx = runtimeRequire('electron-clipboard-ex');
       fileInfo = clipboardEx.readFilePaths();
     } catch (e) {
       // todo
     }
   } else {
     if (!commonConst.linux()) return null;
-    if (!clipboard.has('text/uri-list')) return null;
-    const result = clipboard.read('text/uri-list').match(/^file:\/\/\/.*/gm);
-    if (!result || !result.length) return null;
-    fileInfo = result.map((e) =>
-      decodeURIComponent(e).replace(/^file:\/\//, '')
-    );
+    const uriList = await readClipboardType('text/uri-list');
+    if (!uriList) return null;
+    fileInfo = parseUriList(uriList);
   }
   if (!Array.isArray(fileInfo)) return null;
   const target: any = fileInfo

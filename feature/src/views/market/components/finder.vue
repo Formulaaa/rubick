@@ -27,13 +27,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import 'vue3-carousel/dist/carousel.css';
 import { Carousel, Slide } from 'vue3-carousel';
+import { useStore } from 'vuex';
 import request from '../../../assets/request/index';
 import PluginList from './plugin-list.vue';
 
-import { useStore } from 'vuex';
 const store = useStore();
 const totalPlugins = computed(() => store.state.totalPlugins);
 

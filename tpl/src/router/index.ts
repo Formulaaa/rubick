@@ -1,16 +1,20 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import List from "../views/List.vue";
-import Doc from "../views/Doc.vue";
+import {
+  createRouter,
+  createWebHashHistory,
+  type RouteRecordRaw,
+} from 'vue-router';
+import Doc from '../views/Doc.vue';
+import List from '../views/List.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: "/list",
-    name: "list",
+    path: '/list',
+    name: 'list',
     component: List,
   },
   {
-    path: "/doc",
-    name: "doc",
+    path: '/doc',
+    name: 'doc',
     component: Doc,
   },
 ];

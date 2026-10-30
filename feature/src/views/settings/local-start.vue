@@ -26,6 +26,7 @@
 
 <script setup>
 import { ref } from 'vue';
+
 const fs = window.require('fs');
 const process = window.require('process');
 
@@ -66,23 +67,20 @@ const dropFile = (e) => {
     window.market.addLocalStartPlugin(plugin);
     return plugin;
   });
-  localStartList.value = [
-    ...localStartList.value,
-    ...files,
-  ];
+  localStartList.value = [...localStartList.value, ...files];
   window.rubick.dbStorage.setItem(
     dbId,
-    JSON.parse(JSON.stringify(localStartList.value))
+    JSON.parse(JSON.stringify(localStartList.value)),
   );
 };
 
 const remove = (item) => {
   localStartList.value = localStartList.value.filter(
-    (app) => app.desc !== item.desc
+    (app) => app.desc !== item.desc,
   );
   window.rubick.dbStorage.setItem(
     dbId,
-    JSON.parse(JSON.stringify(localStartList.value))
+    JSON.parse(JSON.stringify(localStartList.value)),
   );
   window.market.removeLocalStartPlugin(JSON.parse(JSON.stringify(item)));
 };

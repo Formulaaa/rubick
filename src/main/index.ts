@@ -1,37 +1,26 @@
-'use strict';
-import electron, {
-  app,
-  globalShortcut,
-  protocol,
-  BrowserWindow,
-} from 'electron';
-import { main, guide } from './browsers';
+import electron, { app, type BrowserWindow, globalShortcut } from 'electron';
 import commonConst from '../common/utils/commonConst';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import { guide, main } from './browsers';
 import API from './common/api';
-import createTray from './common/tray';
-import registerHotKey from './common/registerHotKey';
-import localConfig from './common/initLocalConfig';
 import {
   getSearchFiles,
-  putFileToRubick,
   macBeforeOpen,
+  putFileToRubick,
 } from './common/getSearchFiles';
+import localConfig from './common/initLocalConfig';
+import registerHotKey from './common/registerHotKey';
+import createTray from './common/tray';
 
 import '../common/utils/localPlugin';
 
-import checkVersion from './common/versionHandler';
 import registerSystemPlugin from './common/registerSystemPlugin';
+import checkVersion from './common/versionHandler';
 
 class App {
   public windowCreator: { init: () => void; getWindow: () => BrowserWindow };
   private systemPlugins: any;
 
   constructor() {
-    protocol.registerSchemesAsPrivileged([
-      { scheme: 'app', privileges: { secure: true, standard: true } },
-    ]);
     this.windowCreator = main();
     const gotTheLock = app.requestSingleInstanceLock();
     if (!gotTheLock) {
@@ -51,7 +40,7 @@ class App {
       if (commonConst.production() && !app.isInApplicationsFolder()) {
         app.moveToApplicationsFolder();
       } else {
-        app.dock.hide();
+        app.dock?.hide();
       }
     } else {
       app.disableHardwareAcceleration();
@@ -80,7 +69,7 @@ class App {
         Object.assign(electron, {
           mainWindow: this.windowCreator.getWindow(),
           API,
-        })
+        }),
       );
     };
     if (!app.isReady()) {

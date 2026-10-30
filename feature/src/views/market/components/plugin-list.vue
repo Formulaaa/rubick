@@ -100,19 +100,19 @@
 
 <script setup>
 import {
-  CloudDownloadOutlined,
   ArrowLeftOutlined,
-  SelectOutlined
+  CloudDownloadOutlined,
+  SelectOutlined,
 } from '@ant-design/icons-vue';
-
-import { defineProps, ref, computed } from 'vue';
-import { useStore } from 'vuex';
 import { message } from 'ant-design-vue';
 import MarkdownIt from 'markdown-it';
-import { useRouter } from 'vue-router';
-import request from '@/assets/request/index';
-import notFountJson from '@/assets/lottie/404.json';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
+import { useStore } from 'vuex';
+import notFountJson from '@/assets/lottie/404.json';
+import request from '@/assets/request/index';
+
 const { t } = useI18n();
 
 const store = useStore();
@@ -132,7 +132,9 @@ const props = defineProps({
 const downloadPlugin = async (plugin) => {
   startDownload(plugin.name);
   await window.market.downloadPlugin(plugin);
-  message.success(t('feature.dev.installSuccess', { pluginName: plugin.pluginName }));
+  message.success(
+    t('feature.dev.installSuccess', { pluginName: plugin.pluginName }),
+  );
   successDownload(plugin.name);
 };
 
@@ -160,10 +162,10 @@ const showDetail = async (index) => {
 const detail = computed(() => props.list[showIndex.value]);
 
 const openPlugin = (item) => {
-  store.commit('commonUpdate', {active: ['installed']})
+  store.commit('commonUpdate', { active: ['installed'] });
   router.push({
     path: '/installed',
-    query: {plugin: item.name}
+    query: { plugin: item.name },
   });
 };
 </script>

@@ -1,38 +1,38 @@
-import { createApp } from 'vue';
-import Vue3Lottie from 'vue3-lottie';
 import {
-  ConfigProvider,
+  Alert,
+  Avatar,
   Button,
-  Divider,
-  Row,
   Col,
+  Collapse,
+  ConfigProvider,
+  Divider,
+  Drawer,
   Dropdown,
-  Menu,
   Form,
   Input,
-  Radio,
-  Typography,
-  Select,
-  Switch,
-  Avatar,
-  Popconfirm,
-  Collapse,
   List,
-  Tooltip,
-  Alert,
-  Drawer,
+  Menu,
   Modal,
-  Upload,
+  Popconfirm,
+  Radio,
   Result,
+  Row,
+  Select,
   Spin,
+  Switch,
+  Tooltip,
+  Typography,
+  Upload,
 } from 'ant-design-vue';
+import { createApp } from 'vue';
+import Vue3Lottie from 'vue3-lottie';
 import App from './App.vue';
 import router from './router';
 import store from './store';
 import './assets/ant-reset.less';
 import 'ant-design-vue/dist/antd.variable.min.css';
-import registerI18n from './languages/i18n';
 import localConfig from './confOp';
+import registerI18n from './languages/i18n';
 
 const config: any = localConfig.getConfig();
 

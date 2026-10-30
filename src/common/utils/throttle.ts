@@ -4,7 +4,7 @@ export default function throttle(func, wait, options?: any): () => void {
   let timeout = null;
   let previous = 0;
   if (!options) options = {};
-  const later = function () {
+  const later = () => {
     previous = options.leading === false ? 0 : Date.now();
     timeout = null;
     result = func.apply(context, args);
@@ -16,14 +16,12 @@ export default function throttle(func, wait, options?: any): () => void {
     // 计算剩余时间
     const remaining = wait - (now - previous);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+    // @ts-expect-error
     context = this;
     // eslint-disable-next-line prefer-rest-params
     args = arguments;
     if (remaining <= 0 || remaining > wait) {
       if (timeout) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
         clearTimeout(timeout);
         timeout = null;
       }
@@ -32,7 +30,7 @@ export default function throttle(func, wait, options?: any): () => void {
       if (!timeout) context = args = null;
     } else if (!timeout && options.trailing !== false) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
+      // @ts-expect-error
       timeout = setTimeout(later, remaining);
     }
     return result;

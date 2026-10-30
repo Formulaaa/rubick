@@ -52,18 +52,19 @@
 </template>
 
 <script setup lang="ts">
-import { defineProps, defineEmits, ref } from 'vue';
-import { ipcRenderer } from 'electron';
 import { MoreOutlined } from '@ant-design/icons-vue';
+import { ipcRenderer } from 'electron';
+import { ref } from 'vue';
+import fileIcon from '../assets/file.png';
+import defaultLogo from '../assets/logo.png';
 
 const remote = window.require('@electron/remote');
+
 import localConfig from '../confOp';
+
 const { Menu } = remote;
 
 const config: any = ref(localConfig.getConfig());
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const defaultLogo = require('../assets/logo.png');
 
 const onLogoError = (e) => {
   // 兜底默认头像，避免自定义图片失效后一直显示裂图
@@ -263,7 +264,7 @@ const getIcon = () => {
       data: { path: props.clipboardFile[0].path },
     });
   } catch (e) {
-    return require('../assets/file.png');
+    return fileIcon;
   }
 };
 

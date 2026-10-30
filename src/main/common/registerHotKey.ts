@@ -1,16 +1,17 @@
 import {
-  globalShortcut,
-  nativeTheme,
-  BrowserWindow,
-  BrowserView,
-  ipcMain,
   app,
+  type BrowserView,
+  type BrowserWindow,
+  globalShortcut,
+  ipcMain,
   Notification,
+  nativeTheme,
+  systemPreferences,
 } from 'electron';
+import { UiohookKey, uIOhook } from 'uiohook-napi';
 import screenCapture from '@/core/screen-capture';
 import localConfig from '@/main/common/initLocalConfig';
 import winPosition from './getWinPosition';
-import { uIOhook, UiohookKey } from 'uiohook-napi';
 
 const registerHotKey = (mainWindow: BrowserWindow): void => {
   // 设置开机启动
@@ -19,7 +20,6 @@ const registerHotKey = (mainWindow: BrowserWindow): void => {
     if (app.getLoginItemSettings().openAtLogin !== config.perf.common.start) {
       app.setLoginItemSettings({
         openAtLogin: config.perf.common.start,
-        openAsHidden: true,
       });
     }
   };
@@ -38,21 +38,21 @@ const registerHotKey = (mainWindow: BrowserWindow): void => {
     if (isDark) {
       nativeTheme.themeSource = 'dark';
       mainWindow.webContents.executeJavaScript(
-        `document.body.classList.add("dark");window.rubick.theme="dark"`
+        `document.body.classList.add("dark");window.rubick.theme="dark"`,
       );
       mainWindow.getBrowserViews().forEach((view: BrowserView) => {
         view.webContents.executeJavaScript(
-          `document.body.classList.add("dark");window.rubick.theme="dark"`
+          `document.body.classList.add("dark");window.rubick.theme="dark"`,
         );
       });
     } else {
       nativeTheme.themeSource = 'light';
       mainWindow.webContents.executeJavaScript(
-        `document.body.classList.remove("dark");window.rubick.theme="light"`
+        `document.body.classList.remove("dark");window.rubick.theme="light"`,
       );
       mainWindow.getBrowserViews().forEach((view: BrowserView) => {
         view.webContents.executeJavaScript(
-          `document.body.classList.remove("dark");window.rubick.theme="light"`
+          `document.body.classList.remove("dark");window.rubick.theme="light"`,
         );
       });
     }
@@ -90,9 +90,16 @@ const registerHotKey = (mainWindow: BrowserWindow): void => {
 
     // 注册偏好快捷键
     // 处理显示/隐藏快捷键的注册
-    const doublePressShortcuts = ['Ctrl+Ctrl', 'Option+Option', 'Shift+Shift', 'Command+Command'];
-    const isDoublePressShortcut = doublePressShortcuts.includes(config.perf.shortCut.showAndHidden);
-    
+    const doublePressShortcuts = [
+      'Ctrl+Ctrl',
+      'Option+Option',
+      'Shift+Shift',
+      'Command+Command',
+    ];
+    const isDoublePressShortcut = doublePressShortcuts.includes(
+      config.perf.shortCut.showAndHidden,
+    );
+
     if (isDoublePressShortcut) {
       // 双击快捷键（如 Ctrl+Ctrl）详见 uIOhookRegister 函数实现
     } else {
@@ -120,8 +127,12 @@ const registerHotKey = (mainWindow: BrowserWindow): void => {
 
     // 添加局部快捷键监听
     mainWindow.webContents.on('before-input-event', (event, input) => {
-      if (input.key.toLowerCase() === 'w'
-        && (input.control || input.meta) && !input.alt && !input.shift) {
+      if (
+        input.key.toLowerCase() === 'w' &&
+        (input.control || input.meta) &&
+        !input.alt &&
+        !input.shift
+      ) {
         event.preventDefault();
         if (mainWindow && !mainWindow.isDestroyed()) {
           mainWindow.hide();
@@ -181,5 +192,22 @@ function uIOhookRegister(callback: () => void) {
       lastModifierPress = currentTime;
     }
   });
-  uIOhook.start();
+
+  const startHook = async () => {
+    try {
+      if (
+        process.platform === 'darwin' &&
+        !systemPreferences.isTrustedAccessibilityClient(true)
+      ) {
+        console.warn(
+          'Accessibility permission is required for double-modifier shortcuts.',
+        );
+        return;
+      }
+      await uIOhook.start();
+    } catch (error) {
+      console.error('Failed to start uiohook:', error);
+    }
+  };
+  void startHook();
 }

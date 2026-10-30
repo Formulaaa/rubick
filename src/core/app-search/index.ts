@@ -1,13 +1,16 @@
-import commonConst from "@/common/utils/commonConst";
+import commonConst from '@/common/utils/commonConst';
+import darwin from './darwin';
+import linux from './linux';
+import win from './win';
 
 let appSearch;
 
 if (commonConst.macOS()) {
-  appSearch = require("./darwin");
+  appSearch = darwin;
 } else if (commonConst.windows()) {
-  appSearch = require("./win");
+  appSearch = win;
 } else if (commonConst.linux()) {
-  appSearch = require("./linux");
+  appSearch = linux;
 }
 
-export default appSearch.default;
+export default appSearch;

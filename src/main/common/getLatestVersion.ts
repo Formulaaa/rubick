@@ -1,5 +1,6 @@
 // for referer policy, we can't use it in renderer
 import axios from 'axios';
+
 const RELEASE_URL = 'https://api.github.com/repos/rubickCenter/rubick/releases';
 
 export const getLatestVersion = async (isCheckBetaUpdate = false) => {

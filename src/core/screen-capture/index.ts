@@ -1,16 +1,25 @@
+import { exec, execFile } from 'child_process';
 import { clipboard, Notification } from 'electron';
-import { execFile, exec } from 'child_process';
-import platform from '@/common/utils/commonConst';
+import fs from 'fs';
 import path from 'path';
+import { readClipboardImage } from '@/common/utils/clipboard';
+import platform from '@/common/utils/commonConst';
+import staticPath from '@/main/common/staticPath';
+
+const emitClipboardImage = async (cb) => {
+  const image = await readClipboardImage();
+  cb && cb(image ? image.toDataURL() : '');
+};
 
 // 截图方法windows
 export const screenWindow = (cb) => {
-  const url = path.resolve(__static, 'ScreenCapture.exe');
-  const screen_window = execFile(url);
+  const url = path.resolve(staticPath, 'ScreenCapture.exe');
+  const unpacked = url.replace('app.asar', 'app.asar.unpacked');
+  const target = fs.existsSync(unpacked) ? unpacked : url;
+  const screen_window = execFile(target);
   screen_window.on('exit', (code) => {
     if (code) {
-      const image = clipboard.readImage();
-      cb && cb(image.isEmpty() ? '' : image.toDataURL());
+      void emitClipboardImage(cb);
     }
   });
 };
@@ -18,14 +27,13 @@ export const screenWindow = (cb) => {
 // 截图方法mac
 export const handleScreenShots = (cb) => {
   exec('screencapture -i -r -c', () => {
-    const image = clipboard.readImage();
-    cb && cb(image.isEmpty() ? '' : image.toDataURL());
+    void emitClipboardImage(cb);
   });
 };
 
 export default (mainWindow, cb) => {
   // 接收到截图后的执行程序
-  clipboard.writeText('');
+  void clipboard.writeText('');
   if (platform.macOS()) {
     handleScreenShots(cb);
   } else if (platform.windows()) {

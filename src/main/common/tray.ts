@@ -1,9 +1,10 @@
-import { dialog, Menu, Tray, app, shell, BrowserWindow } from 'electron';
-import path from 'path';
-import pkg from '../../../package.json';
+import { app, type BrowserWindow, dialog, Menu, shell, Tray } from 'electron';
 import os from 'os';
+import path from 'path';
 import commonConst from '@/common/utils/commonConst';
+import pkg from '../../../package.json';
 import { guide } from '../browsers';
+import staticPath from './staticPath';
 
 function createTray(window: BrowserWindow): Promise<Tray> {
   return new Promise((resolve) => {
@@ -18,11 +19,11 @@ function createTray(window: BrowserWindow): Promise<Tray> {
     } else {
       icon = './icons/icon@2x.png';
     }
-    const appIcon = new Tray(path.join(__static, icon));
+    const appIcon = new Tray(path.join(staticPath, icon));
 
     const openSettings = () => {
       window.webContents.executeJavaScript(
-        `window.rubick && window.rubick.openMenu && window.rubick.openMenu({ code: "settings" })`
+        `window.rubick && window.rubick.openMenu && window.rubick.openMenu({ code: "settings" })`,
       );
       window.show();
     };

@@ -47,12 +47,13 @@
 </template>
 
 <script setup>
-import { reactive, toRefs, watch, ref } from 'vue';
 import debounce from 'lodash.debounce';
-import path from 'path';
-import localConfig from '@/confOp';
+import { reactive, ref, toRefs, watch } from 'vue';
 import * as Themes from '@/assets/constans';
+import localConfig from '@/confOp';
+
 const { ipcRenderer } = window.require('electron');
+const path = window.require('path');
 const fs = window.require('fs');
 const remote = window.require('@electron/remote');
 const { pathToFileURL } = window.require('url');
@@ -77,8 +78,8 @@ const setConfig = debounce(() => {
           ...perf,
           custom: state.custom,
         },
-      })
-    )
+      }),
+    ),
   );
   ipcRenderer.send('re-register');
 }, 500);
@@ -98,7 +99,7 @@ const changeLogo = () => {
     // 把图片复制到应用数据目录，避免原图被移动/删除后头像裂图
     const targetPath = path.join(
       remote.app.getPath('userData'),
-      'custom-logo.png'
+      'custom-logo.png',
     );
     fs.copyFileSync(logoPath, targetPath);
     // 使用 pathToFileURL 做 URI 编码，并带上时间戳绕过头像缓存

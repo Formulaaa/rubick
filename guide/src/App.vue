@@ -53,9 +53,7 @@ const netStep = () => {
     return ipcRenderer.send('guide:service', { type: 'close' });
   }
   step.value = step.value + 1;
-}
-
-
+};
 </script>
 
 <style lang="less">

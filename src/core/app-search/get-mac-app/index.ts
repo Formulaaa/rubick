@@ -1,5 +1,5 @@
-import getApps from './getApps';
 import app2png from './app2png';
+import getApps from './getApps';
 
 export default {
   getApps: () => {

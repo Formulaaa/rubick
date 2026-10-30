@@ -1,7 +1,8 @@
 import { dialog, shell } from 'electron';
-import pkg from '../../../package.json';
 import { lt } from 'semver';
+import pkg from '../../../package.json';
 import { getLatestVersion } from './getLatestVersion';
+
 const version = pkg.version;
 const downloadUrl = 'https://github.com/rubickCenter/rubick/releases/latest';
 

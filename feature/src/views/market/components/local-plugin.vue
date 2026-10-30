@@ -93,11 +93,11 @@
 </template>
 
 <script setup>
-import { UploadOutlined, DeleteOutlined } from '@ant-design/icons-vue';
-import { ref, reactive, getCurrentInstance, computed } from 'vue';
+import { DeleteOutlined, UploadOutlined } from '@ant-design/icons-vue';
 import { message } from 'ant-design-vue';
-import PluginList from './plugin-list.vue';
+import { computed, getCurrentInstance, reactive, ref } from 'vue';
 import { useStore } from 'vuex';
+import PluginList from './plugin-list.vue';
 
 const visible = ref(false);
 const store = useStore();

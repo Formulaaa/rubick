@@ -143,18 +143,19 @@
   </a-modal>
 </template>
 <script setup>
-import { useStore } from 'vuex';
-import { computed, ref, reactive } from 'vue';
 import {
-  DatabaseOutlined,
   CloudDownloadOutlined,
-  LoadingOutlined,
+  DatabaseOutlined,
   ExportOutlined,
   ImportOutlined,
+  LoadingOutlined,
   SettingOutlined,
 } from '@ant-design/icons-vue';
-import { message, Modal } from 'ant-design-vue';
+import { Modal, message } from 'ant-design-vue';
+import { computed, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useStore } from 'vuex';
+import logoImage from '../../assets/logo.png';
 
 const { t } = useI18n();
 
@@ -165,7 +166,7 @@ const currentSelect = ref({ plugin: {} });
 const detail = ref({});
 
 const defaultConfig = window.rubick.dbStorage.getItem(
-  'rubick-db-jg-webdav'
+  'rubick-db-jg-webdav',
 ) || {
   url: 'https://dav.jianguoyun.com/dav/',
   username: '',
@@ -186,7 +187,7 @@ const showKeys = (item) => {
 const handleOk = () => {
   window.rubick.dbStorage.setItem(
     'rubick-db-jg-webdav',
-    JSON.parse(JSON.stringify(formState))
+    JSON.parse(JSON.stringify(formState)),
   );
   message.success('保存成功');
   showSetting.value = false;
@@ -199,14 +200,14 @@ const showDetail = (key) => {
 
 const exportData = () => {
   if (!formState.password || !formState.username) {
-    return showSetting.value = true;
+    return (showSetting.value = true);
   }
   window.market.dbDump(JSON.parse(JSON.stringify(formState)));
 };
 
 const importData = () => {
   if (!formState.password || !formState.username) {
-    return showSetting.value = true;
+    return (showSetting.value = true);
   }
   Modal.confirm({
     title: '导入确认',
@@ -235,7 +236,7 @@ const dataPlugins = computed(() => {
       plugin = {
         pluginName: '主程序',
         isdownload: true,
-        logo: require('../../assets/logo.png'),
+        logo: logoImage,
       };
     } else {
       plugin = totalPlugins.value.find((p) => p.name === item.name);

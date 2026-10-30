@@ -42,16 +42,16 @@
   </div>
 </template>
 <script setup>
-import { useStore } from 'vuex';
 import { computed, ref, toRaw } from 'vue';
+import { useStore } from 'vuex';
 
 const store = useStore();
 const localPlugins = computed(() =>
   store.state.localPlugins.filter(
     (plugin) =>
       plugin.name !== 'rubick-system-feature' &&
-      plugin.name !== 'rubick-system-super-panel'
-  )
+      plugin.name !== 'rubick-system-super-panel',
+  ),
 );
 
 const hasAdded = (plugin) => {
@@ -70,7 +70,7 @@ const superPanelPlugins = ref(
   window.rubick.db.get('super-panel-db') || {
     data: [],
     _id: 'super-panel-db',
-  }
+  },
 );
 
 const addPluginToSuperPanel = (plugin) => {
@@ -82,7 +82,7 @@ const removePluginToSuperPanel = (plugin) => {
   superPanelPlugins.value.data = toRaw(superPanelPlugins.value).data.filter(
     (item) => {
       return item.name !== plugin.name;
-    }
+    },
   );
   window.rubick.db.put(toRaw(superPanelPlugins.value));
 };

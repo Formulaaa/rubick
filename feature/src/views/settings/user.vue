@@ -27,11 +27,11 @@
 </template>
 
 <script setup>
+import { message } from 'ant-design-vue';
 import { nanoid } from 'nanoid';
 import { ref, watch } from 'vue';
-import { message } from 'ant-design-vue';
-import Index from './index';
 import service from '../../assets/service';
+import Index from './index';
 
 const userInfo = ref(window.rubick.dbStorage.getItem('rubick-user-info'));
 

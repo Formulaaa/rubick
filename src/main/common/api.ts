@@ -1,32 +1,41 @@
+import { pathToFileURL } from 'node:url';
 import {
-  BrowserWindow,
-  ipcMain,
-  dialog,
   app,
+  BrowserWindow,
+  clipboard,
+  dialog,
+  ipcMain,
   Notification,
   nativeImage,
-  clipboard,
   screen,
   shell,
 } from 'electron';
 import fs from 'fs';
-import { screenCapture } from '@/core';
-import plist from 'plist';
 import ks from 'node-key-sender';
-
+import path from 'path';
+import plist from 'plist';
 import {
-  DECODE_KEY,
   PLUGIN_INSTALL_DIR as baseDir,
+  DECODE_KEY,
 } from '@/common/constans/main';
-import getCopyFiles from '@/common/utils/getCopyFiles';
+import {
+  clearClipboard,
+  getClipboardFormats,
+  rawFormat,
+  readClipboardImage,
+  readClipboardText,
+  writeClipboardImage,
+  writeClipboardItems,
+} from '@/common/utils/clipboard';
 import common from '@/common/utils/commonConst';
-
+import commonConst from '@/common/utils/commonConst';
+import getCopyFiles from '@/common/utils/getCopyFiles';
+import { screenCapture } from '@/core';
+import { detach, runner } from '../browsers';
 import mainInstance from '../index';
-import { runner, detach } from '../browsers';
 import DBInstance from './db';
 import getWinPosition from './getWinPosition';
-import path from 'path';
-import commonConst from '@/common/utils/commonConst';
+import staticPath from './staticPath';
 import { copyFilesToWindowsClipboard } from './windowsClipboard';
 
 /**
@@ -38,8 +47,8 @@ const sanitizeInputFiles = (input: unknown): string[] => {
   const candidates = Array.isArray(input)
     ? input
     : typeof input === 'string'
-    ? [input]
-    : [];
+      ? [input]
+      : [];
   return candidates
     .map((filePath) => (typeof filePath === 'string' ? filePath.trim() : ''))
     .filter((filePath) => {
@@ -66,7 +75,7 @@ class API extends DBInstance {
     });
     // 按 ESC 退出插件
     mainWindow.webContents.on('before-input-event', (event, input) =>
-      this.__EscapeKeyDown(event, input, mainWindow)
+      this.__EscapeKeyDown(event, input, mainWindow),
     );
     // 设置主窗口的 show/hide 事件监听
     this.setupMainWindowHooks(mainWindow);
@@ -115,7 +124,7 @@ class API extends DBInstance {
 
   public loadPlugin({ data: plugin }, window) {
     window.webContents.executeJavaScript(
-      `window.loadPlugin(${JSON.stringify(plugin)})`
+      `window.loadPlugin(${JSON.stringify(plugin)})`,
     );
     this.openPlugin({ data: plugin }, window);
   }
@@ -134,33 +143,32 @@ class API extends DBInstance {
     if (!plugin.main) {
       plugin.tplPath = common.dev()
         ? 'http://localhost:8083/#/'
-        : `file://${__static}/tpl/index.html`;
+        : pathToFileURL(path.join(staticPath, 'tpl/index.html')).href;
     }
     if (plugin.name === 'rubick-system-feature') {
-      plugin.logo = plugin.logo || `file://${__static}/logo.png`;
+      plugin.logo =
+        plugin.logo || pathToFileURL(path.join(staticPath, 'logo.png')).href;
       plugin.indexPath = commonConst.dev()
         ? 'http://localhost:8081/#/'
-        : `file://${__static}/feature/index.html`;
+        : pathToFileURL(path.join(staticPath, 'feature/index.html')).href;
     } else if (!plugin.indexPath) {
       const pluginPath = path.resolve(baseDir, 'node_modules', plugin.name);
-      plugin.indexPath = `file://${path.join(
-        pluginPath,
-        './',
-        plugin.main || ''
-      )}`;
+      plugin.indexPath = pathToFileURL(
+        path.join(pluginPath, './', plugin.main || ''),
+      ).href;
     }
     runnerInstance.init(plugin, window);
     this.currentPlugin = plugin;
     window.webContents.executeJavaScript(
       `window.setCurrentPlugin(${JSON.stringify({
         currentPlugin: this.currentPlugin,
-      })})`
+      })})`,
     );
     window.show();
     const view = runnerInstance.getView();
     if (!view.inited) {
       view.webContents.on('before-input-event', (event, input) =>
-        this.__EscapeKeyDown(event, input, window)
+        this.__EscapeKeyDown(event, input, window),
       );
     }
   }
@@ -202,7 +210,7 @@ class API extends DBInstance {
         ? height - 60
         : 0;
     originWindow.webContents.executeJavaScript(
-      `window.setPosition && typeof window.setPosition === "function" && window.setPosition(${position})`
+      `window.setPosition && typeof window.setPosition === "function" && window.setPosition(${position})`,
     );
   }
 
@@ -212,7 +220,7 @@ class API extends DBInstance {
     originWindow.webContents.executeJavaScript(
       `window.setSubInput(${JSON.stringify({
         placeholder: data.placeholder,
-      })})`
+      })})`,
     );
   }
 
@@ -236,7 +244,7 @@ class API extends DBInstance {
     originWindow.webContents.executeJavaScript(
       `window.setSubInputValue(${JSON.stringify({
         value: data.text,
-      })})`
+      })})`,
     );
     this.sendSubInputChangeEvent({ data });
   }
@@ -257,17 +265,35 @@ class API extends DBInstance {
     notify.show();
   }
 
-  public copyImage = ({ data }) => {
+  public copyImage = async ({ data }) => {
     const image = nativeImage.createFromDataURL(data.img);
-    clipboard.writeImage(image);
+    await writeClipboardImage(image);
   };
 
-  public copyText({ data }) {
-    clipboard.writeText(String(data.text));
+  public async copyText({ data }) {
+    await clipboard.writeText(String(data.text));
     return true;
   }
 
-  public copyFile({ data }) {
+  public clipboardGetFormats() {
+    return getClipboardFormats();
+  }
+
+  public clipboardReadText() {
+    return readClipboardText();
+  }
+
+  public async clipboardReadImage() {
+    const image = await readClipboardImage();
+    return image ? image.toDataURL() : '';
+  }
+
+  public clipboardClear() {
+    clearClipboard();
+    return true;
+  }
+
+  public async copyFile({ data }) {
     const targetFiles = sanitizeInputFiles(data?.file);
 
     if (!targetFiles.length) {
@@ -276,10 +302,13 @@ class API extends DBInstance {
 
     if (process.platform === 'darwin') {
       try {
-        clipboard.writeBuffer(
-          'NSFilenamesPboardType',
-          Buffer.from(plist.build(targetFiles))
-        );
+        const uriList = targetFiles
+          .map((file) => pathToFileURL(file).href)
+          .join('\r\n');
+        await writeClipboardItems({
+          'text/uri-list': uriList,
+          [rawFormat('NSFilenamesPboardType')]: plist.build(targetFiles),
+        });
         return true;
       } catch {
         return false;
@@ -287,7 +316,7 @@ class API extends DBInstance {
     }
 
     if (process.platform === 'win32') {
-      return copyFilesToWindowsClipboard(targetFiles);
+      return await copyFilesToWindowsClipboard(targetFiles);
     }
 
     return false;
@@ -315,7 +344,7 @@ class API extends DBInstance {
     window.webContents.executeJavaScript(
       `window.updatePlugin(${JSON.stringify({
         currentPlugin: this.currentPlugin,
-      })})`
+      })})`,
     );
     return true;
   }
@@ -333,7 +362,7 @@ class API extends DBInstance {
     window.webContents.executeJavaScript(
       `window.updatePlugin(${JSON.stringify({
         currentPlugin: this.currentPlugin,
-      })})`
+      })})`,
     );
     return true;
   }
@@ -368,7 +397,7 @@ class API extends DBInstance {
             subInput: res,
           },
           window.getBounds(),
-          view
+          view,
         );
         window.webContents.executeJavaScript(`window.initRubick()`);
         window.setSize(window.getSize()[0], 60);
@@ -425,7 +454,7 @@ class API extends DBInstance {
     window.webContents.executeJavaScript(
       `window.addLocalStartPlugin(${JSON.stringify({
         plugin,
-      })})`
+      })})`,
     );
   }
 
@@ -433,7 +462,7 @@ class API extends DBInstance {
     window.webContents.executeJavaScript(
       `window.removeLocalStartPlugin(${JSON.stringify({
         plugin,
-      })})`
+      })})`,
     );
   }
 }

@@ -98,7 +98,7 @@ window.leaveFullScreenTrigger = () => {
 };
 
 window.maximizeTrigger = () => {
-  const btnMaximize = document.querySelector('.maximize')
+  const btnMaximize = document.querySelector('.maximize');
   if (!btnMaximize || btnMaximize.classList.contains('unmaximize')) return;
   btnMaximize.classList.add('unmaximize');
 };
@@ -116,16 +116,16 @@ if (process.platform === 'darwin') {
       return;
     }
     if (e.metaKey && (e.code === 'KeyW' || e.code === 'KeyQ')) {
-      window.handle.close()
+      window.handle.close();
     }
-  }
+  };
 } else {
   window.onkeydown = (e) => {
     if (e.ctrlKey && e.code === 'KeyW') {
-      window.handle.close()
-      return
+      window.handle.close();
+      return;
     }
-  }
+  };
 }
 </script>
 

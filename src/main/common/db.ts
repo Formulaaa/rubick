@@ -1,5 +1,5 @@
-import { LocalDb } from '@/core';
 import { app } from 'electron';
+import { LocalDb } from '@/core';
 
 const dbInstance = new LocalDb(app.getPath('userData'));
 dbInstance.init();
@@ -16,7 +16,7 @@ export default class DBInstance {
         dbInfo = { data: [], _id: this.DB_INFO_KET };
       }
       const item = dbInfo.data.find(
-        (it) => it.name === this.currentPlugin.name
+        (it) => it.name === this.currentPlugin.name,
       );
       if (item) {
         !item.keys.includes(data.data._id) && item.keys.push(data.data._id);

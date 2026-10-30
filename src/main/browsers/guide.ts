@@ -1,10 +1,13 @@
+import { pathToFileURL } from 'node:url';
 import { BrowserWindow, ipcMain, nativeTheme, screen } from 'electron';
 import path from 'path';
 import {
+  GUIDE_HEIGHT,
   GUIDE_WIDTH,
   WINDOW_MIN_HEIGHT,
-  GUIDE_HEIGHT,
 } from '@/common/constans/common';
+import commonConst from '@/common/utils/commonConst';
+import staticPath from '../common/staticPath';
 
 const getWindowPos = (width, height) => {
   const screenPoint = screen.getCursorScreenPoint();
@@ -57,11 +60,13 @@ export default () => {
         spellcheck: false,
       },
     });
-    if (process.env.WEBPACK_DEV_SERVER_URL) {
+    if (commonConst.dev()) {
       // Load the url of the dev server if in development mode
       win.loadURL('http://localhost:8084');
     } else {
-      win.loadURL(`file://${path.join(__static, './guide/index.html')}`);
+      win.loadURL(
+        pathToFileURL(path.join(staticPath, './guide/index.html')).href,
+      );
     }
     win.on('closed', () => {
       win = undefined;

@@ -23,43 +23,52 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-2022, ubuntu-latest]
+        include:
+          - os: macos-latest
+            build_args: --mac --x64 --arm64
+          - os: windows-2022
+            build_args: --win --x64 --ia32
+          - os: ubuntu-latest
+            build_args: --linux
 
     # create steps
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
-      # step1: check out repository
       - name: Check out git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      # step2: install node env
-      - name: Install Node.js
-        uses: actions/setup-node@v2
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
         with:
-          node-version: 16.x
+          version: 12.3.4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
       - name: Install system deps
         if: matrix.os == 'ubuntu-latest'
         run: |
+          sudo apt-get update
           sudo apt-get install libxtst-dev libpng++-dev
           sudo apt-get install --no-install-recommends -y icnsutils graphicsmagick xz-utils
           sudo snap install snapcraft --classic
-      # step3: yarn
-      - name: Yarn install
-        run: |
-          yarn
-          yarn global add xvfb-maybe
-          yarn global add @vue/cli@4.5.0  --frozen-lockfile --ignore-engines
-      - name: Build feature
-        run: |
-          cd ./feature
-          yarn
-          npm run build
-      - name: Build  & release app
-        run: |
-          npm run release
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build apps
+        run: pnpm build:apps
+
+      - name: Build main app
+        run: pnpm build
+
+      - name: Build & release app
+        run: pnpm exec electron-builder ${{ matrix.build_args }} --publish always
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}

@@ -1,20 +1,20 @@
-import getCopyFiles from '@/common/utils/getCopyFiles';
-import { clipboard, nativeImage, ipcRenderer } from 'electron';
 import { getGlobal } from '@electron/remote';
+import { ipcRenderer, nativeImage } from 'electron';
 import path from 'path';
-import pluginClickEvent from './pluginClickEvent';
-import localConfig from '../confOp';
 import { ref } from 'vue';
+import linkIcon from '../assets/link.png';
+import localConfig from '../confOp';
+import pluginClickEvent from './pluginClickEvent';
 
 export default ({ currentPlugin, optionsRef, openPlugin, setOptionsRef }) => {
   const clipboardFile: any = ref([]);
-  const searchFocus = (files, strict = true) => {
+  const searchFocus = async (files, strict = true) => {
     const config: any = localConfig.getConfig();
     // 未开启自动粘贴
     if (!config.perf.common.autoPast && strict) return;
 
     if (currentPlugin.value.name) return;
-    const fileList = files || getCopyFiles();
+    const fileList = files || (await window.rubick.getCopyedFiles());
     // 拷贝的是文件
     if (fileList) {
       window.setSubInputValue({ value: '' });
@@ -24,17 +24,17 @@ export default ({ currentPlugin, optionsRef, openPlugin, setOptionsRef }) => {
         {
           name: '复制路径',
           value: 'plugin',
-          icon: require('../assets/link.png'),
+          icon: linkIcon,
           desc: '复制路径到剪切板',
           click: () => {
-            clipboard.writeText(fileList.map((file) => file.path).join(','));
+            window.rubick.copyText(fileList.map((file) => file.path).join(','));
             ipcRenderer.send('msg-trigger', { type: 'hideMainWindow' });
           },
         },
       ];
       // 判断复制的文件类型是否一直
       const commonLen = fileList.filter(
-        (file) => path.extname(fileList[0].path) === path.extname(file.path)
+        (file) => path.extname(fileList[0].path) === path.extname(file.path),
       ).length;
       // 复制路径
       if (commonLen !== fileList.length) {
@@ -117,18 +117,18 @@ export default ({ currentPlugin, optionsRef, openPlugin, setOptionsRef }) => {
         });
       }
       setOptionsRef(options);
-      clipboard.clear();
+      window.rubick.clipboardClear();
       return;
     }
-    const clipboardType = clipboard.availableFormats();
+    const clipboardType = await window.rubick.clipboardGetFormats();
     if (!clipboardType.length) return;
     if ('text/plain' === clipboardType[0]) {
-      const contentText = clipboard.readText();
+      const contentText = await window.rubick.clipboardReadText();
       if (contentText.trim()) {
         clearClipboardFile();
         window.setSubInputValue({ value: contentText });
       }
-      clipboard.clear();
+      window.rubick.clipboardClear();
     }
   };
 
@@ -137,10 +137,10 @@ export default ({ currentPlugin, optionsRef, openPlugin, setOptionsRef }) => {
     optionsRef.value = [];
   };
   // 触发 ctrl + v 主动粘贴时
-  const readClipboardContent = () => {
+  const readClipboardContent = async () => {
     // read image
-    const img = clipboard.readImage();
-    const dataUrl = img.toDataURL();
+    const dataUrl = await window.rubick.clipboardReadImage();
+    if (!dataUrl) return;
     if (!dataUrl.replace('data:image/png;base64,', '')) return;
     clipboardFile.value = [
       {

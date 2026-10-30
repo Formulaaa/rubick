@@ -35,10 +35,7 @@ function translate(sourceStr: string): Array<any> {
  */
 function searchPinYin(str: string, data: any): string {
   for (const key in data) {
-    if (
-      Object.prototype.hasOwnProperty.call(data, key) &&
-      data[key].indexOf(str) !== -1
-    ) {
+    if (Object.hasOwn(data, key) && data[key].indexOf(str) !== -1) {
       return key;
     }
   }

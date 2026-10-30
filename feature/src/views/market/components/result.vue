@@ -20,10 +20,10 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useStore } from 'vuex';
 import emptyJson from '@/assets/lottie/empty.json';
 import PluginList from './plugin-list.vue';
 
-import { useStore } from 'vuex';
 const store = useStore();
 
 const totalPlugins = computed(() => store.state.totalPlugins);

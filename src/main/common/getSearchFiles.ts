@@ -1,6 +1,7 @@
-import path from 'path';
 import fs from 'fs-extra';
 import os from 'os';
+import path from 'path';
+import staticPath from './staticPath';
 
 const getSearchFiles = (argv = process.argv, cwd = process.cwd()) => {
   const files = argv.slice(2); // 过滤['rubick.exe', 'search']这两个参数，直接获取需要上传的图片路径
@@ -33,14 +34,14 @@ const getSearchFiles = (argv = process.argv, cwd = process.cwd()) => {
 
 const putFileToRubick = (webContents, files) => {
   webContents.executeJavaScript(
-    `window.searchFocus(${JSON.stringify(files)}, false)`
+    `window.searchFocus(${JSON.stringify(files)}, false)`,
   );
 };
 
-const copyFileOutsideOfElectronAsar = function (
+const copyFileOutsideOfElectronAsar = (
   sourceInAsarArchive,
-  destOutsideAsarArchive
-) {
+  destOutsideAsarArchive,
+) => {
   if (fs.existsSync(sourceInAsarArchive)) {
     // file will be copied
     if (fs.statSync(sourceInAsarArchive).isFile()) {
@@ -55,10 +56,10 @@ const copyFileOutsideOfElectronAsar = function (
 
     // dir is browsed
     else if (fs.statSync(sourceInAsarArchive).isDirectory()) {
-      fs.readdirSync(sourceInAsarArchive).forEach(function (fileOrFolderName) {
+      fs.readdirSync(sourceInAsarArchive).forEach((fileOrFolderName) => {
         copyFileOutsideOfElectronAsar(
           sourceInAsarArchive + '/' + fileOrFolderName,
-          destOutsideAsarArchive + '/' + fileOrFolderName
+          destOutsideAsarArchive + '/' + fileOrFolderName,
         );
       });
     }
@@ -74,8 +75,8 @@ const macBeforeOpen = () => {
     // 如果不存在就复制过去
     try {
       copyFileOutsideOfElectronAsar(
-        path.join(__static, 'rubick.workflow'),
-        dest
+        path.join(staticPath, 'rubick.workflow'),
+        dest,
       );
     } catch (e) {
       console.log(e);
@@ -83,4 +84,4 @@ const macBeforeOpen = () => {
   }
 };
 
-export { getSearchFiles, putFileToRubick, macBeforeOpen };
+export { getSearchFiles, macBeforeOpen, putFileToRubick };

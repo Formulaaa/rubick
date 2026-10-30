@@ -1,13 +1,13 @@
-import { app, BrowserWindow, protocol, nativeTheme } from 'electron';
+import { BrowserWindow, nativeTheme, protocol } from 'electron';
 import path from 'path';
-import { createProtocol } from 'vue-cli-plugin-electron-builder/lib';
-// import versonHandler from '../common/versionHandler';
-import localConfig from '@/main/common/initLocalConfig';
 import {
   WINDOW_HEIGHT,
   WINDOW_MIN_HEIGHT,
   WINDOW_WIDTH,
 } from '@/common/constans/common';
+// import versonHandler from '../common/versionHandler';
+import localConfig from '@/main/common/initLocalConfig';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('@electron/remote/main').initialize();
 
@@ -38,17 +38,15 @@ export default () => {
         contextIsolation: false,
         webviewTag: true,
         nodeIntegration: true,
-        preload: path.join(__static, 'preload.js'),
+        preload: path.join(__dirname, '../preload/preload.js'),
         spellcheck: false,
       },
     });
-    if (process.env.WEBPACK_DEV_SERVER_URL) {
+    if (process.env.ELECTRON_RENDERER_URL) {
       // Load the url of the dev server if in development mode
-      win.loadURL(process.env.WEBPACK_DEV_SERVER_URL as string);
+      win.loadURL(process.env.ELECTRON_RENDERER_URL);
     } else {
-      createProtocol('app');
-      // Load the index.html when not in development
-      win.loadURL('app://./index.html');
+      win.loadFile(path.join(__dirname, '../renderer/index.html'));
     }
     protocol.interceptFileProtocol('image', (req, callback) => {
       const url = req.url.substr(8);
@@ -61,7 +59,7 @@ export default () => {
     win.on('show', () => {
       // 触发主窗口的 onShow hook
       win.webContents.executeJavaScript(
-        `window.rubick && window.rubick.hooks && typeof window.rubick.hooks.onShow === "function" && window.rubick.hooks.onShow()`
+        `window.rubick && window.rubick.hooks && typeof window.rubick.hooks.onShow === "function" && window.rubick.hooks.onShow()`,
       );
       // versonHandler.checkUpdate();
       // win.webContents.openDevTools();
@@ -70,7 +68,7 @@ export default () => {
     win.on('hide', () => {
       // 触发主窗口的 onHide hook
       win.webContents.executeJavaScript(
-        `window.rubick && window.rubick.hooks && typeof window.rubick.hooks.onHide === "function" && window.rubick.hooks.onHide()`
+        `window.rubick && window.rubick.hooks && typeof window.rubick.hooks.onHide === "function" && window.rubick.hooks.onHide()`,
       );
     });
 

@@ -1,5 +1,5 @@
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 
 export default (): string => {
   let localDataFile: any = process.env.HOME;

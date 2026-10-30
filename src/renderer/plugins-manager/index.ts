@@ -1,18 +1,20 @@
-import { reactive, toRefs, ref } from 'vue';
-import { nativeImage, ipcRenderer } from 'electron';
 import { getGlobal } from '@electron/remote';
-import appSearch from '@/core/app-search';
-import { PluginHandler } from '@/core';
-import path from 'path';
-import commonConst from '@/common/utils/commonConst';
+import { message } from 'ant-design-vue';
 import { exec } from 'child_process';
-import searchManager from './search';
-import optionsManager from './options';
+import { ipcRenderer, nativeImage } from 'electron';
+import path from 'path';
+import { reactive, ref, toRefs } from 'vue';
 import {
   PLUGIN_INSTALL_DIR as baseDir,
   PLUGIN_HISTORY,
 } from '@/common/constans/renderer';
-import { message } from 'ant-design-vue';
+import commonConst from '@/common/utils/commonConst';
+import appSearch from '@/core/app-search';
+import PluginHandler from '@/core/plugin-handler';
+import optionsManager from './options';
+import searchManager from './search';
+
+const { pathToFileURL } = window.require('url');
 
 const createPluginManager = (): any => {
   const pluginInstance = new PluginHandler({
@@ -96,8 +98,8 @@ const createPluginManager = (): any => {
               type: plugin.cmd.type || 'text',
               payload: null,
             },
-          })
-        )
+          }),
+        ),
       );
     }
     if (plugin.pluginType === 'app') {
@@ -177,14 +179,14 @@ const createPluginManager = (): any => {
   const getPluginInfo = async ({ pluginName, pluginPath }) => {
     const pluginInfo = await pluginInstance.getAdapterInfo(
       pluginName,
-      pluginPath
+      pluginPath,
     );
     return {
       ...pluginInfo,
       icon: pluginInfo.logo,
       indexPath: commonConst.dev()
         ? 'http://localhost:8081/#/'
-        : `file://${path.join(pluginPath, '../', pluginInfo.main)}`,
+        : pathToFileURL(path.join(pluginPath, '../', pluginInfo.main)).href,
     };
   };
 

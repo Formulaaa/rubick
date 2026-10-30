@@ -1,7 +1,7 @@
-import path from 'path';
 import fs from 'fs';
-import { PluginHandler } from '@/core';
+import path from 'path';
 import { PLUGIN_INSTALL_DIR as baseDir } from '@/common/constans/main';
+import PluginHandler from '@/core/plugin-handler';
 import API from '@/main/common/api';
 
 const configPath = path.join(baseDir, './rubick-local-plugin.json');
@@ -37,7 +37,7 @@ global.LOCAL_PLUGINS = {
       // 获取 dev 插件信息
       const pluginPath = path.resolve(baseDir, 'node_modules', plugin.name);
       const pluginInfo = JSON.parse(
-        fs.readFileSync(path.join(pluginPath, './package.json'), 'utf8')
+        fs.readFileSync(path.join(pluginPath, './package.json'), 'utf8'),
       );
       plugin = {
         ...plugin,
@@ -51,7 +51,7 @@ global.LOCAL_PLUGINS = {
     // 获取 dev 插件信息
     const pluginPath = path.resolve(baseDir, 'node_modules', plugin.name);
     const pluginInfo = JSON.parse(
-      fs.readFileSync(path.join(pluginPath, './package.json'), 'utf8')
+      fs.readFileSync(path.join(pluginPath, './package.json'), 'utf8'),
     );
     plugin = {
       ...plugin,
@@ -76,7 +76,7 @@ global.LOCAL_PLUGINS = {
     try {
       if (!global.LOCAL_PLUGINS.PLUGINS.length) {
         global.LOCAL_PLUGINS.PLUGINS = JSON.parse(
-          fs.readFileSync(configPath, 'utf-8')
+          fs.readFileSync(configPath, 'utf-8'),
         );
       }
       return global.LOCAL_PLUGINS.PLUGINS;
@@ -105,14 +105,14 @@ global.LOCAL_PLUGINS = {
           return plugin;
         }
         return origin;
-      }
+      },
     );
     fs.writeFileSync(configPath, JSON.stringify(global.LOCAL_PLUGINS.PLUGINS));
   },
   async deletePlugin(plugin) {
     await pluginInstance.uninstall([plugin.name], { isDev: plugin.isDev });
     global.LOCAL_PLUGINS.PLUGINS = global.LOCAL_PLUGINS.PLUGINS.filter(
-      (p) => plugin.name !== p.name
+      (p) => plugin.name !== p.name,
     );
     fs.writeFileSync(configPath, JSON.stringify(global.LOCAL_PLUGINS.PLUGINS));
     return global.LOCAL_PLUGINS.PLUGINS;

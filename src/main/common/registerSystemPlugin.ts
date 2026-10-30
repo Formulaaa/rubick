@@ -1,13 +1,14 @@
 /* eslint-disable */
-import path from 'path';
+
 import fs from 'fs';
+import path from 'path';
 import { PLUGIN_INSTALL_DIR } from '@/common/constans/main';
 
 export default () => {
   // 读取所有插件
   const totalPlugins = global.LOCAL_PLUGINS.getLocalPlugins();
   let systemPlugins = totalPlugins.filter(
-    (plugin) => plugin.pluginType === 'system'
+    (plugin) => plugin.pluginType === 'system',
   );
   systemPlugins = systemPlugins
     .map((plugin) => {
@@ -15,7 +16,7 @@ export default () => {
         const pluginPath = path.resolve(
           PLUGIN_INSTALL_DIR,
           'node_modules',
-          plugin.name
+          plugin.name,
         );
         return {
           ...plugin,
@@ -28,19 +29,17 @@ export default () => {
     .filter(Boolean);
 
   const hooks = {
-    onReady: [],
+    onReady: [] as any[],
   };
 
   systemPlugins.forEach((plugin) => {
     if (fs.existsSync(plugin.indexPath)) {
-      const pluginModule = __non_webpack_require__(plugin.indexPath)();
-      // @ts-ignore
+      const pluginModule = require(plugin.indexPath)();
       hooks.onReady.push(pluginModule.onReady);
     }
   });
 
   const triggerReadyHooks = (ctx) => {
-    // @ts-ignore
     hooks.onReady.forEach((hook: any) => {
       try {
         hook && hook(ctx);

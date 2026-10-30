@@ -1,33 +1,35 @@
-import { createApp } from 'vue';
 import {
-  Button,
-  List,
-  Spin,
-  Input,
   Avatar,
-  Tag,
-  ConfigProvider,
-  Row,
+  Button,
   Col,
+  ConfigProvider,
   Divider,
+  Input,
+  List,
+  Row,
+  Spin,
+  Tag,
 } from 'ant-design-vue';
+import { createApp } from 'vue';
 import App from './App.vue';
 import localConfig from './confOp';
 
 import 'ant-design-vue/dist/antd.variable.min.css';
 
-const config: any = localConfig.getConfig();
-
-ConfigProvider.config({
-  theme: config.perf.custom || {},
-});
-
-window.rubick.changeTheme = () => {
-  const config: any = localConfig.getConfig();
+const applyTheme = () => {
+  const current: any = localConfig.getConfig();
+  const isDark = !!current.perf.common.darkMode;
+  document.body.classList.toggle('dark', isDark);
+  window.rubick.theme = isDark ? 'dark' : 'light';
   ConfigProvider.config({
-    theme: config.perf.custom || {},
+    theme: current.perf.custom || {},
   });
 };
+
+// 主进程可能在渲染进程加载完成前就尝试设置主题，这里在渲染层再兜底一次
+applyTheme();
+
+window.rubick.changeTheme = applyTheme;
 
 createApp(App)
   .use(Button)

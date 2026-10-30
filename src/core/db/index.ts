@@ -1,7 +1,7 @@
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 import PouchDB from 'pouchdb';
-import { DBError, Doc, DocRes } from './types';
+import type { DBError, Doc, DocRes } from './types';
 import WebDavOP from './webdav';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -49,7 +49,7 @@ export default class DB {
     if (Buffer.byteLength(JSON.stringify(doc)) > this.docMaxByteLength) {
       return this.errorInfo(
         'exception',
-        `doc max size ${this.docMaxByteLength / 1024 / 1024} M`
+        `doc max size ${this.docMaxByteLength / 1024 / 1024} M`,
       );
     }
     return false;
@@ -58,7 +58,7 @@ export default class DB {
   async put(
     name: string,
     doc: Doc<any>,
-    strict = true
+    strict = true,
   ): Promise<DBError | DocRes> {
     if (strict) {
       const err = this.checkDocSize(doc);
@@ -107,13 +107,13 @@ export default class DB {
       if ('object' === typeof doc) {
         doc._id = this.replaceDocId(name, doc._id);
       }
-      return this.errorInfo(e.name, e.message);
+      return this.errorInfo((e as any).name, (e as any).message);
     }
   }
 
   async bulkDocs(
     name: string,
-    docs: Array<Doc<any>>
+    docs: Array<Doc<any>>,
   ): Promise<DBError | Array<DocRes>> {
     let result;
     try {
@@ -150,7 +150,7 @@ export default class DB {
 
   async allDocs(
     name: string,
-    key: string | Array<string>
+    key: string | Array<string>,
   ): Promise<DBError | Array<DocRes>> {
     const config: any = { include_docs: true };
     if (key) {
@@ -161,7 +161,7 @@ export default class DB {
         if (!Array.isArray(key))
           return this.errorInfo(
             'exception',
-            'param only key(string) or keys(Array[string])'
+            'param only key(string) or keys(Array[string])',
           );
         config.keys = key.map((key) => this.getDocId(name, key));
       }
@@ -209,7 +209,7 @@ export default class DB {
     name: string,
     docId: string,
     attachment: Buffer | Uint8Array,
-    type: string
+    type: string,
   ) {
     const buffer = Buffer.from(attachment);
     if (buffer.byteLength > this.docAttachmentMaxByteLength)
@@ -217,7 +217,7 @@ export default class DB {
         'exception',
         'attachment data up to ' +
           this.docAttachmentMaxByteLength / 1024 / 1024 +
-          'M'
+          'M',
       );
     try {
       const result = await this.pouchDB.put({
@@ -227,7 +227,7 @@ export default class DB {
       result.id = this.replaceDocId(name, result.id);
       return result;
     } catch (e) {
-      return this.errorInfo(e.name, e.message);
+      return this.errorInfo((e as any).name, (e as any).message);
     }
   }
 

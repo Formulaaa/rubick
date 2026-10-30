@@ -11,13 +11,13 @@ const winPosition = {
       winPosition.id = currentDisplay.id;
       winPosition.x = parseInt(
         String(
-          currentDisplay.workArea.x + currentDisplay.workArea.width / 2 - 400
-        )
+          currentDisplay.workArea.x + currentDisplay.workArea.width / 2 - 400,
+        ),
       );
       winPosition.y = parseInt(
         String(
-          currentDisplay.workArea.y + currentDisplay.workArea.height / 2 - 200
-        )
+          currentDisplay.workArea.y + currentDisplay.workArea.height / 2 - 200,
+        ),
       );
     }
     return {

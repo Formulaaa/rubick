@@ -232,24 +232,24 @@
 
 <script setup>
 import {
-  ToolOutlined,
-  LaptopOutlined,
   DatabaseOutlined,
+  FolderOpenOutlined,
+  LaptopOutlined,
   MinusCircleOutlined,
   PlusCircleOutlined,
-  UserOutlined,
-  FolderOpenOutlined,
   SafetyOutlined,
+  ToolOutlined,
+  UserOutlined,
 } from '@ant-design/icons-vue';
 import debounce from 'lodash.debounce';
-import { ref, reactive, watch, toRefs, computed } from 'vue';
-import keycodes from './keycode';
-import Localhost from './localhost.vue';
-import UserInfo from './user-info';
-import LocalStart from './local-start';
-import DataBase from './database';
+import { computed, reactive, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import localConfig from '@/confOp';
+import DataBase from './database';
+import keycodes from './keycode';
+import LocalStart from './local-start';
+import Localhost from './localhost.vue';
+import UserInfo from './user-info';
 
 const { locale, t } = useI18n();
 
@@ -281,9 +281,11 @@ const DOUBLE_CLICK_THRESHOLD = 300; // 双击时间阈值（毫秒）
 const isWindows = window?.rubick?.isWindows();
 const tipText = computed(() => {
   const optionKeyName = isWindows ? 'Alt' : 'Option、Command';
-  return t('feature.settings.global.addShortcutKeyTips', {
-    optionKeyName: optionKeyName,
-  }) + `此外你也可以双击修饰键如（Ctrl+Ctrl）`;
+  return (
+    t('feature.settings.global.addShortcutKeyTips', {
+      optionKeyName: optionKeyName,
+    }) + `此外你也可以双击修饰键如（Ctrl+Ctrl）`
+  );
 });
 
 const currentSelect = ref(['userInfo']);
@@ -308,8 +310,8 @@ const setConfig = debounce(() => {
           local: state.local,
         },
         global: state.global,
-      })
-    )
+      }),
+    ),
   );
   ipcRenderer.send('re-register');
 }, 500);
@@ -319,7 +321,8 @@ watch(state, setConfig);
 const changeShortCut = (e, key) => {
   let compose = '';
   const currentTime = Date.now();
-  const isDoubleClick = currentTime - lastKeyPressTime.value < DOUBLE_CLICK_THRESHOLD;
+  const isDoubleClick =
+    currentTime - lastKeyPressTime.value < DOUBLE_CLICK_THRESHOLD;
   lastKeyPressTime.value = currentTime;
 
   // 处理 F1-F12 功能键
@@ -330,19 +333,23 @@ const changeShortCut = (e, key) => {
 
   // 处理双击功能键的情况
   if (isDoubleClick) {
-    if (e.keyCode === 17) { // Ctrl
+    if (e.keyCode === 17) {
+      // Ctrl
       state.shortCut[key] = 'Ctrl+Ctrl';
       return;
     }
-    if (e.keyCode === 18) { // Alt
+    if (e.keyCode === 18) {
+      // Alt
       state.shortCut[key] = 'Option+Option';
       return;
     }
-    if (e.keyCode === 16) { // Shift
+    if (e.keyCode === 16) {
+      // Shift
       state.shortCut[key] = 'Shift+Shift';
       return;
     }
-    if (e.key === 'Meta' || [91, 92, 93].includes(e.keyCode)) { // Command
+    if (e.key === 'Meta' || [91, 92, 93].includes(e.keyCode)) {
+      // Command
       state.shortCut[key] = 'Command+Command';
       return;
     }
@@ -350,7 +357,7 @@ const changeShortCut = (e, key) => {
 
   // 处理功能键+普通键的组合
   let hasModifierKey = false;
-  
+
   if (e.ctrlKey && e.keyCode !== 17) {
     compose += '+Ctrl';
     hasModifierKey = true;
@@ -470,7 +477,7 @@ const changeLanguage = (value) => {
 </script>
 
 <style lang="less">
-@import '~@/assets/common.less';
+@import '@/assets/common.less';
 
 .settings {
   box-sizing: border-box;

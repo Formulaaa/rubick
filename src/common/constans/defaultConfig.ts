@@ -1,3 +1,7 @@
+import { pathToFileURL } from 'node:url';
+import path from 'path';
+import staticPath from '@/main/common/staticPath';
+
 export default {
   version: 7,
   perf: {
@@ -8,7 +12,7 @@ export default {
       warningColor: '#e5a84b',
       successColor: '#c0d695',
       infoColor: '#aa8eeB',
-      logo: `file://${__static}/logo.png`,
+      logo: pathToFileURL(path.join(staticPath, 'logo.png')).href,
       placeholder: '你好，Rubick！请输入插件关键词',
       username: 'Rubick',
     },

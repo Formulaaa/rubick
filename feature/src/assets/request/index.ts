@@ -13,8 +13,7 @@ try {
 
 const instance = axios.create({
   timeout: 4000,
-  baseURL:
-    baseURL || 'https://gitee.com/monkeyWang/rubickdatabase/raw/master',
+  baseURL: baseURL || 'https://gitee.com/monkeyWang/rubickdatabase/raw/master',
 });
 
 export default {
@@ -22,7 +21,7 @@ export default {
     let targetPath = 'plugins/total-plugins.json';
     if (access_token) {
       targetPath = `${encodeURIComponent(
-        targetPath
+        targetPath,
       )}?access_token=${access_token}&ref=master`;
     }
     const res = await instance.get(targetPath);
@@ -34,7 +33,7 @@ export default {
     let targetPath = 'plugins/finder.json';
     if (access_token) {
       targetPath = `${encodeURIComponent(
-        targetPath
+        targetPath,
       )}?access_token=${access_token}&ref=master`;
     }
     const res = await instance.get(targetPath);
@@ -45,7 +44,7 @@ export default {
     let targetPath = 'plugins/system.json';
     if (access_token) {
       targetPath = `${encodeURIComponent(
-        targetPath
+        targetPath,
       )}?access_token=${access_token}&ref=master`;
     }
     const res = await instance.get(targetPath);
@@ -55,7 +54,7 @@ export default {
     let targetPath = 'plugins/worker.json';
     if (access_token) {
       targetPath = `${encodeURIComponent(
-        targetPath
+        targetPath,
       )}?access_token=${access_token}&ref=master`;
     }
     const res = await instance.get(targetPath);
@@ -71,7 +70,7 @@ export default {
     let targetPath = 'plugins/search.json';
     if (access_token) {
       targetPath = `${encodeURIComponent(
-        targetPath
+        targetPath,
       )}?access_token=${access_token}&ref=master`;
     }
     const res = await instance.get(targetPath);
@@ -81,7 +80,7 @@ export default {
     let targetPath = 'plugins/dev.json';
     if (access_token) {
       targetPath = `${encodeURIComponent(
-        targetPath
+        targetPath,
       )}?access_token=${access_token}&ref=master`;
     }
     const res = await instance.get(targetPath);
@@ -91,7 +90,7 @@ export default {
     let targetPath = 'plugins/image.json';
     if (access_token) {
       targetPath = `${encodeURIComponent(
-        targetPath
+        targetPath,
       )}?access_token=${access_token}&ref=master`;
     }
     const res = await instance.get(targetPath);
