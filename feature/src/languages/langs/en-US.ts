@@ -69,6 +69,10 @@ export default {
           cn: '简体中文',
           en: 'English',
           history: 'keywords search history',
+          windowPosition: 'Window Position',
+          windowPositionDesc: 'Restore the default top-center position',
+          resetPosition: 'Reset Position',
+          resetPositionSuccess: 'Window position reset',
         },
         global: {
           title: 'Global Shortcut Key',

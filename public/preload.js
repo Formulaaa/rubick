@@ -102,6 +102,7 @@ window.rubick = {
   clipboardReadText: () => ipcSendSync('clipboardReadText'),
   clipboardReadImage: () => ipcSendSync('clipboardReadImage'),
   clipboardClear: () => ipcSendSync('clipboardClear'),
+  resetWindowPosition: () => ipcSendSync('resetWindowPosition'),
   db: {
     put: (data) => ipcSendSync('dbPut', { data }),
     get: (id) => ipcSendSync('dbGet', { id }),

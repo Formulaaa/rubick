@@ -7,6 +7,7 @@ import {
   macBeforeOpen,
   putFileToRubick,
 } from './common/getSearchFiles';
+import winPosition from './common/getWinPosition';
 import localConfig from './common/initLocalConfig';
 import registerHotKey from './common/registerHotKey';
 import createTray from './common/tray';
@@ -17,7 +18,10 @@ import registerSystemPlugin from './common/registerSystemPlugin';
 import checkVersion from './common/versionHandler';
 
 class App {
-  public windowCreator: { init: () => void; getWindow: () => BrowserWindow };
+  public windowCreator: {
+    init: () => Promise<void>;
+    getWindow: () => BrowserWindow;
+  };
   private systemPlugins: any;
 
   constructor() {
@@ -47,22 +51,26 @@ class App {
     }
   }
 
-  createWindow() {
-    this.windowCreator.init();
+  async createWindow() {
+    await this.windowCreator.init();
   }
   onReady() {
     const readyFunction = async () => {
       checkVersion();
       await localConfig.init();
+      await winPosition.load();
       const config = await localConfig.getConfig();
       if (!config.perf.common.guide) {
         guide().init();
         config.perf.common.guide = true;
         localConfig.setConfig(config);
       }
-      this.createWindow();
+      await this.createWindow();
       const mainWindow = this.windowCreator.getWindow();
       API.init(mainWindow);
+      if (!app.getLoginItemSettings().wasOpenedAtLogin) {
+        mainWindow.show();
+      }
       createTray(this.windowCreator.getWindow());
       registerHotKey(this.windowCreator.getWindow());
       this.systemPlugins.triggerReadyHooks(
@@ -89,17 +97,20 @@ class App {
         if (win.isMinimized()) {
           win.restore();
         }
-        win.focus();
         if (files.length > 0) {
-          win.show();
           putFileToRubick(win.webContents, files);
         }
+        win.show();
+        win.focus();
       }
     });
-    app.on('activate', () => {
+    app.on('activate', async () => {
       if (!this.windowCreator.getWindow()) {
-        this.createWindow();
+        await this.createWindow();
       }
+      const win = this.windowCreator.getWindow();
+      win.show();
+      win.focus();
     });
     if (commonConst.windows()) {
       // app.setAppUserModelId(pkg.build.appId)

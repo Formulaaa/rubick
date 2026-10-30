@@ -7,6 +7,7 @@ import {
 } from '@/common/constans/common';
 // import versonHandler from '../common/versionHandler';
 import localConfig from '@/main/common/initLocalConfig';
+import winPosition from '../common/getWinPosition';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require('@electron/remote/main').initialize();
@@ -14,13 +15,14 @@ require('@electron/remote/main').initialize();
 export default () => {
   let win: any;
 
-  const init = () => {
-    createWindow();
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('@electron/remote/main').enable(win.webContents);
+  const init = async () => {
+    await createWindow();
   };
 
   const createWindow = async () => {
+    const config = await localConfig.getConfig();
+    const isDark =
+      config?.perf?.common?.darkMode ?? nativeTheme.shouldUseDarkColors;
     win = new BrowserWindow({
       height: WINDOW_HEIGHT,
       minHeight: WINDOW_MIN_HEIGHT,
@@ -31,7 +33,7 @@ export default () => {
       title: '拉比克',
       show: false,
       skipTaskbar: true,
-      backgroundColor: nativeTheme.shouldUseDarkColors ? '#1c1c28' : '#fff',
+      backgroundColor: isDark ? '#1c1c28' : '#fff',
       webPreferences: {
         webSecurity: false,
         backgroundThrottling: false,
@@ -42,6 +44,10 @@ export default () => {
         spellcheck: false,
       },
     });
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('@electron/remote/main').enable(win.webContents);
+    const { x, y } = winPosition.getPosition();
+    win.setPosition(x, y);
     if (process.env.ELECTRON_RENDERER_URL) {
       // Load the url of the dev server if in development mode
       win.loadURL(process.env.ELECTRON_RENDERER_URL);

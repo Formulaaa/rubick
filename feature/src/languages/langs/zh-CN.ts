@@ -68,6 +68,10 @@ export default {
           cn: '简体中文',
           en: 'English',
           history: '关键词搜索记录',
+          windowPosition: '窗口位置',
+          windowPositionDesc: '恢复为默认的中上部居中位置',
+          resetPosition: '重置位置',
+          resetPositionSuccess: '窗口位置已重置',
         },
         global: {
           title: '全局快捷键',

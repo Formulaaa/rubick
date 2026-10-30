@@ -19,7 +19,10 @@ import 'ant-design-vue/dist/antd.variable.min.css';
 const applyTheme = () => {
   const current: any = localConfig.getConfig();
   const isDark = !!current.perf.common.darkMode;
+  const background = isDark ? '#1c1c28' : '#fff';
   document.body.classList.toggle('dark', isDark);
+  document.documentElement.style.backgroundColor = background;
+  document.body.style.backgroundColor = background;
   window.rubick.theme = isDark ? 'dark' : 'light';
   ConfigProvider.config({
     theme: current.perf.custom || {},

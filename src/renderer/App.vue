@@ -178,6 +178,14 @@ const clearSearchValue = () => {
 
 <style lang="less">
 @import './assets/var.less';
+html,
+body {
+  height: 100%;
+  background: var(--color-body-bg);
+}
+#app {
+  height: 100%;
+}
 #components-layout {
   height: 100vh;
   overflow: hidden;

@@ -131,6 +131,19 @@
             </div>
           </div>
           <div class="setting-item">
+            <div class="title">
+              {{ $t('feature.settings.basic.windowPosition') }}
+            </div>
+            <div class="settings-item-li">
+              <div class="label">
+                {{ $t('feature.settings.basic.windowPositionDesc') }}
+              </div>
+              <a-button size="small" @click="resetWindowPosition">
+                {{ $t('feature.settings.basic.resetPosition') }}
+              </a-button>
+            </div>
+          </div>
+          <div class="setting-item">
             <div class="title">{{ $t('feature.settings.basic.theme') }}</div>
             <div class="settings-item-li">
               <div class="label">{{ $t('feature.settings.basic.darkMode') }}</div>
@@ -241,6 +254,7 @@ import {
   ToolOutlined,
   UserOutlined,
 } from '@ant-design/icons-vue';
+import { message } from 'ant-design-vue';
 import debounce from 'lodash.debounce';
 import { computed, reactive, ref, toRefs, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -254,6 +268,11 @@ import UserInfo from './user-info';
 const { locale, t } = useI18n();
 
 const { ipcRenderer } = window.require('electron');
+
+const resetWindowPosition = () => {
+  window.rubick.resetWindowPosition();
+  message.success(t('feature.settings.basic.resetPositionSuccess'));
+};
 
 const examples = [
   {

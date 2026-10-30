@@ -122,6 +122,12 @@ class API extends DBInstance {
     getWinPosition.setPosition(x - mouseX, y - mouseY);
   }
 
+  public resetWindowPosition(_, window) {
+    const { x, y } = getWinPosition.reset();
+    window.setPosition(x, y);
+    return true;
+  }
+
   public loadPlugin({ data: plugin }, window) {
     window.webContents.executeJavaScript(
       `window.loadPlugin(${JSON.stringify(plugin)})`,
