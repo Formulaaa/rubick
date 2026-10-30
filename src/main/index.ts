@@ -88,21 +88,24 @@ class App {
   }
 
   onRunning() {
-    app.on('second-instance', (event, commandLine, workingDirectory) => {
+    app.on('second-instance', async (event, commandLine, workingDirectory) => {
       const files = getSearchFiles(commandLine, workingDirectory);
-      const win = this.windowCreator.getWindow();
+      let win = this.windowCreator.getWindow();
+      if (!win) {
+        await this.createWindow();
+        win = this.windowCreator.getWindow();
+      }
+      if (!win) return;
       // 当运行第二个实例时,将会聚焦到myWindow这个窗口
       // 如果有文件列表作为参数，说明是命令行启动
-      if (win) {
-        if (win.isMinimized()) {
-          win.restore();
-        }
-        if (files.length > 0) {
-          putFileToRubick(win.webContents, files);
-        }
-        win.show();
-        win.focus();
+      if (win.isMinimized()) {
+        win.restore();
       }
+      if (files.length > 0) {
+        putFileToRubick(win.webContents, files);
+      }
+      win.show();
+      win.focus();
     });
     app.on('activate', async () => {
       if (!this.windowCreator.getWindow()) {
