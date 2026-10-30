@@ -1,11 +1,5 @@
 <template>
   <div class="finder">
-    <Carousel :itemsToShow="2" :transition="500">
-      <Slide :key="index" v-for="(banner, index) in data.banners || []">
-        <img class="carousel__item" @click="jumpTo(banner.link)" :src="banner.src" />
-      </Slide>
-    </Carousel>
-    <a-divider />
     <PluginList
       v-if="must && !!must.length"
       @downloadSuccess="downloadSuccess"
@@ -28,8 +22,6 @@
 
 <script setup>
 import { computed, onBeforeMount, ref } from 'vue';
-import 'vue3-carousel/dist/carousel.css';
-import { Carousel, Slide } from 'vue3-carousel';
 import { useStore } from 'vuex';
 import request from '../../../assets/request/index';
 import PluginList from './plugin-list.vue';
@@ -56,10 +48,6 @@ const must = computed(() => {
     return searchInfo;
   });
 });
-
-const jumpTo = (url) => {
-  window.rubick.shellOpenExternal(url);
-};
 
 const recommend = computed(() => {
   const defaultData = data.value.recommend || [];
@@ -99,39 +87,5 @@ const newList = computed(() => {
   &::-webkit-scrollbar {
     width: 0;
   }
-  .ant-divider-horizontal {
-    margin: 17px 0;
-  }
-}
-
-
-.carousel__item {
-  cursor: pointer;
-  min-height: 180px;
-  width: 100%;
-  background-color: var(--vc-clr-primary);
-  color: var(--vc-clr-white);
-  font-size: 20px;
-  border-radius: 8px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.carousel__track {
-  margin-bottom: 0;
-}
-
-.carousel__slide {
-  padding-right: 6px;
-  &:last-child {
-    padding-left: 6px;
-  }
-}
-
-.carousel__prev,
-.carousel__next {
-  box-sizing: content-box;
-  border: 5px solid white;
 }
 </style>
