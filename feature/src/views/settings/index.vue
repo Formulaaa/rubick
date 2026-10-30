@@ -342,7 +342,7 @@ const changeShortCut = (e, key) => {
       state.shortCut[key] = 'Shift+Shift';
       return;
     }
-    if (e.keyCode === 93) { // Command
+    if (e.key === 'Meta' || [91, 92, 93].includes(e.keyCode)) { // Command
       state.shortCut[key] = 'Command+Command';
       return;
     }
@@ -363,7 +363,7 @@ const changeShortCut = (e, key) => {
     compose += '+Option';
     hasModifierKey = true;
   }
-  if (e.metaKey && e.keyCode !== 93) {
+  if (e.metaKey && e.key !== 'Meta') {
     compose += '+Command';
     hasModifierKey = true;
   }
@@ -394,7 +394,7 @@ const changeGlobalKey = (e, index) => {
     compose += '+Option';
     incluFuncKeys = true;
   }
-  if (e.metaKey && e.keyCode !== 93) {
+  if (e.metaKey && e.key !== 'Meta') {
     compose += '+Command';
     incluFuncKeys = true;
   }
@@ -405,7 +405,7 @@ const changeGlobalKey = (e, index) => {
     e.keyCode !== 16 &&
     e.keyCode !== 17 &&
     e.keyCode !== 18 &&
-    e.keyCode !== 93
+    e.key !== 'Meta'
   ) {
     state.global[index].key = compose;
   } else {

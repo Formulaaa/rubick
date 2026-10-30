@@ -49,9 +49,13 @@
 <script setup>
 import { reactive, toRefs, watch, ref } from 'vue';
 import debounce from 'lodash.debounce';
+import path from 'path';
 import localConfig from '@/confOp';
 import * as Themes from '@/assets/constans';
 const { ipcRenderer } = window.require('electron');
+const fs = window.require('fs');
+const remote = window.require('@electron/remote');
+const { pathToFileURL } = window.require('url');
 
 const state = reactive({
   custom: {},
@@ -83,12 +87,25 @@ watch(state, setConfig);
 const { custom } = toRefs(state);
 
 const changeLogo = () => {
-  const [logoPath] = window.rubick.showOpenDialog({
+  const result = window.rubick.showOpenDialog({
     title: '请选择 logo 路径',
     filters: [{ name: 'images', extensions: ['png'] }],
     properties: ['openFile'],
   });
-  state.custom.logo = `file://${logoPath}`;
+  if (!result || !result[0]) return;
+  const [logoPath] = result;
+  try {
+    // 把图片复制到应用数据目录，避免原图被移动/删除后头像裂图
+    const targetPath = path.join(
+      remote.app.getPath('userData'),
+      'custom-logo.png'
+    );
+    fs.copyFileSync(logoPath, targetPath);
+    // 使用 pathToFileURL 做 URI 编码，并带上时间戳绕过头像缓存
+    state.custom.logo = `${pathToFileURL(targetPath).href}?t=${Date.now()}`;
+  } catch (e) {
+    console.error('set custom logo failed', e);
+  }
 };
 
 const changeTheme = () => {

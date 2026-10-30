@@ -81,6 +81,10 @@ const registerHotKey = (mainWindow: BrowserWindow): void => {
     await setAutoLogin();
     await setDarkMode();
     await setTheme();
+    // 通知渲染进程重新读取配置（头像、欢迎语等）
+    if (!mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('config-changed');
+    }
     const config = await localConfig.getConfig();
     globalShortcut.unregisterAll();
 
@@ -161,14 +165,15 @@ function uIOhookRegister(callback: () => void) {
     // 双击快捷键，如 Ctrl+Ctrl
     const modifers = config.perf.shortCut.showAndHidden.split('+');
     const showAndHiddenKeyStr = modifers.pop(); // Ctrl
-    const keyStr2uioKeyCode = {
-      Ctrl: UiohookKey.Ctrl,
-      Shift: UiohookKey.Shift,
-      Option: UiohookKey.Alt,
-      Command: UiohookKey.Comma,
+    const keyStr2uioKeyCode: Record<string, number[]> = {
+      Ctrl: [UiohookKey.Ctrl, UiohookKey.CtrlRight],
+      Shift: [UiohookKey.Shift, UiohookKey.ShiftRight],
+      Option: [UiohookKey.Alt, UiohookKey.AltRight],
+      Command: [UiohookKey.Meta, UiohookKey.MetaRight],
     };
+    const uioKeyCodes = keyStr2uioKeyCode[showAndHiddenKeyStr] || [];
 
-    if (uio_event.keycode === keyStr2uioKeyCode[showAndHiddenKeyStr]) {
+    if (uioKeyCodes.includes(uio_event.keycode)) {
       const currentTime = Date.now();
       if (currentTime - lastModifierPress < 300) {
         callback(); // 调用 mainWindowPopUp

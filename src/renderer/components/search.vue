@@ -13,6 +13,7 @@
     <div v-else :class="currentPlugin.cmd ? 'rubick-tag' : ''">
       <img
         @click="() => emit('openMenu')"
+        @error="onLogoError"
         class="rubick-logo"
         :src="currentPlugin.logo || config.perf.custom.logo"
       />
@@ -60,6 +61,21 @@ import localConfig from '../confOp';
 const { Menu } = remote;
 
 const config: any = ref(localConfig.getConfig());
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const defaultLogo = require('../assets/logo.png');
+
+const onLogoError = (e) => {
+  // 兜底默认头像，避免自定义图片失效后一直显示裂图
+  const fallback = new URL(defaultLogo, document.baseURI).href;
+  if (e.target.src !== fallback) {
+    e.target.src = fallback;
+  }
+};
+
+ipcRenderer.on('config-changed', () => {
+  config.value = localConfig.getConfig();
+});
 
 const props: any = defineProps({
   searchValue: {
