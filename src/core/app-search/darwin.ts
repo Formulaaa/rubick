@@ -3,58 +3,44 @@ import os from 'os';
 import path from 'path';
 import getMacApps from './get-mac-app';
 
-const icondir = path.join(os.tmpdir(), 'ProcessIcon');
+const userDataDir =
+  typeof window !== 'undefined' && window.rubick?.getPath
+    ? window.rubick.getPath('userData')
+    : os.tmpdir();
+const icondir = path.join(userDataDir, 'ProcessIcon');
 
-const exists = fs.existsSync(icondir);
-if (!exists) {
-  fs.mkdirSync(icondir);
+if (!fs.existsSync(icondir)) {
+  fs.mkdirSync(icondir, { recursive: true });
+}
+
+function hasValidIcon(iconPath: string) {
+  try {
+    const stat = fs.statSync(iconPath);
+    return stat.isFile() && stat.size > 0;
+  } catch {
+    return false;
+  }
 }
 
 const isZhRegex = /[\u4e00-\u9fa5]/;
 
 async function getAppIcon(appPath: string, nativeImage: any, name: string) {
   try {
-    const iconpath = path.join(icondir, `${name}.png`);
-    const iconnone = path.join(icondir, `${name}.none`);
-    const exists = fs.existsSync(iconpath);
-    const existsnone = fs.existsSync(iconnone);
-    if (exists) return true;
-    if (existsnone) return false;
-    // const appName: string = appPath.split('/').pop() || '';
-    // const extname: string = path.extname(appName);
-    // const appSubStr: string = appName.split(extname)[0];
-    // const path1 = path.join(appPath, `/Contents/Resources/App.icns`);
-    // const path2 = path.join(appPath, `/Contents/Resources/AppIcon.icns`);
-    // const path3 = path.join(appPath, `/Contents/Resources/${appSubStr}.icns`);
-    // const path4 = path.join(
-    //   appPath,
-    //   `/Contents/Resources/${appSubStr.replace(' ', '')}.icns`
-    // );
-    // let iconPath: string = path1;
-    // if (fs.existsSync(path1)) {
-    //   iconPath = path1;
-    // } else if (fs.existsSync(path2)) {
-    //   iconPath = path2;
-    // } else if (fs.existsSync(path3)) {
-    //   iconPath = path3;
-    // } else if (fs.existsSync(path4)) {
-    //   iconPath = path4;
-    // } else {
-    //   // 性能最低的方式
-    //   const resourceList = fs.readdirSync(
-    //     path.join(appPath, `/Contents/Resources`)
-    //   );
-    //   const iconName = resourceList.filter(
-    //     (file) => path.extname(file) === '.icns'
-    //   )[0];
-    //   if (!iconName) {
-    //     fs.writeFileSync(iconnone, '');
-    //     return false;
-    //   }
-    //   iconPath = path.join(appPath, `/Contents/Resources/${iconName}`);
-    // }
+    const safeName = String(name).replace(/[/\\]/g, '_');
+    const iconpath = path.join(icondir, `${safeName}.png`);
+    if (hasValidIcon(iconpath)) return true;
+
+    // A previous run may have left an empty/partial PNG behind.
+    if (fs.existsSync(iconpath)) {
+      try {
+        fs.unlinkSync(iconpath);
+      } catch {
+        // Ignore and let sips overwrite it if possible.
+      }
+    }
+
     await getMacApps.app2png(appPath, iconpath);
-    return true;
+    return hasValidIcon(iconpath);
   } catch (e) {
     return false;
   }
@@ -69,13 +55,17 @@ export default async (nativeImage: any) => {
   });
   for (const app of apps) {
     if (await getAppIcon(app.path, nativeImage, app._name)) {
+      const iconName = String(app._name).replace(/[/\\]/g, '_');
       app.icon =
-        'image://' +
-        path.join(
-          os.tmpdir(),
-          'ProcessIcon',
-          `${encodeURIComponent(app._name)}.png`,
-        );
+        'image://' + path.join(icondir, `${encodeURIComponent(iconName)}.png`);
+    } else {
+      // app2png/sips occasionally fails for system apps (for example Finder).
+      // Electron's native icon API is a reliable last resort.
+      try {
+        app.icon = window.rubick?.getFileIcon?.(app.path);
+      } catch {
+        // Keep the app in the list only when we have a usable icon.
+      }
     }
     // todo getApp size
   }

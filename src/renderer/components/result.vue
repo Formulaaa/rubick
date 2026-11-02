@@ -73,6 +73,7 @@
             <img
               class="h-8 w-8 rounded-[9px] object-contain"
               :src="item.icon"
+              @error="onIconError"
             />
           </span>
           <span
@@ -147,6 +148,7 @@
             <img
               class="h-7 w-7 rounded-[8px] object-contain"
               :src="item.icon"
+              @error="onIconError"
             />
           </span>
           <span class="min-w-0 flex-1">
@@ -210,6 +212,14 @@ import localConfig from '../confOp';
 const path = window.require('path');
 const remote = window.require('@electron/remote');
 const { ipcRenderer } = window.require('electron');
+const fallbackIcon = new URL('../assets/logo.png', import.meta.url).href;
+
+const onIconError = (event: Event) => {
+  const image = event.target as HTMLImageElement;
+  if (!image || image.dataset.fallback) return;
+  image.dataset.fallback = '1';
+  image.src = fallbackIcon;
+};
 
 const config: any = ref(localConfig.getConfig());
 

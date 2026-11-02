@@ -36,6 +36,36 @@ const createPluginManager = (): any => {
     initPluginHistory();
     appList.value = await appSearch(nativeImage);
     initLocalStartPlugin();
+    syncAppHistoryIcons();
+  };
+
+  // Native app icons are cached on disk. If the cache is cleaned or regenerated,
+  // history entries still hold the old image path and would render as broken
+  // images until the app is opened again. Refresh them from the new app list.
+  const syncAppHistoryIcons = () => {
+    if (!appList.value.length || !state.pluginHistory.length) return;
+    const iconMap = new Map(
+      appList.value
+        .filter((app) => app.pluginType === 'app' && app.path && app.icon)
+        .map((app) => [app.path, app.icon]),
+    );
+    let changed = false;
+    const nextHistory = state.pluginHistory.map((item) => {
+      if (item.pluginType !== 'app' || !item.path) return item;
+      const icon = iconMap.get(item.path);
+      if (!icon || icon === item.icon) return item;
+      changed = true;
+      return { ...item, icon };
+    });
+    if (!changed) return;
+
+    state.pluginHistory = nextHistory;
+    const result = window.rubick.db.get(PLUGIN_HISTORY) || {};
+    window.rubick.db.put({
+      _id: PLUGIN_HISTORY,
+      _rev: result._rev,
+      data: JSON.parse(JSON.stringify(state.pluginHistory)),
+    });
   };
 
   const initPluginHistory = () => {
